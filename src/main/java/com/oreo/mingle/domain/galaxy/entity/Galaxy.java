@@ -1,4 +1,4 @@
-package com.oreo.mingle.domain.group.entity;
+package com.oreo.mingle.domain.galaxy.entity;
 
 import com.oreo.mingle.global.entity.BaseTime;
 import jakarta.persistence.*;
@@ -9,9 +9,9 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Group extends BaseTime {
+public class Galaxy extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "group_id")
+    @Column(name = "galaxy_id")
     private Long id;
 }
