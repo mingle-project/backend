@@ -1,5 +1,6 @@
 package com.oreo.mingle.domain.star.entity;
 
+import com.oreo.mingle.domain.star.entity.enums.Rarity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,4 +14,13 @@ public class Star {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "star_id")
     private Long id;
+
+    private String name;
+
+    private String image;
+
+    private String color;
+
+    @Enumerated(EnumType.STRING)
+    private Rarity rarity;
 }
