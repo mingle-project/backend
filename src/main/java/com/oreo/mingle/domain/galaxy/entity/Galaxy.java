@@ -31,7 +31,9 @@ public class Galaxy extends BaseTime {
     @Enumerated(EnumType.STRING)
     private Relationship relationship;
 
-    private boolean isStarted;
+    @Builder.Default
+    private boolean isStarted = false;
 
-    private int cash;
+    @Builder.Default
+    private int cash = 100;
 }

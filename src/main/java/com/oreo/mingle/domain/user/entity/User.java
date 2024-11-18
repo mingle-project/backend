@@ -1,11 +1,10 @@
 package com.oreo.mingle.domain.user.entity;
 
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
+import com.oreo.mingle.domain.user.entity.enums.Role;
 import com.oreo.mingle.global.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
-
-import javax.management.relation.Role;
 
 @Entity
 @Getter
@@ -29,6 +28,6 @@ public class User extends BaseTime {
     private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "galaxy_id", nullable = false)
+    @JoinColumn(name = "galaxy_id")
     private Galaxy galaxy;
 }

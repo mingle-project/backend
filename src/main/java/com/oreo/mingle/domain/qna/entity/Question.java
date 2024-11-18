@@ -1,5 +1,6 @@
 package com.oreo.mingle.domain.qna.entity;
 
+import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.global.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,4 +15,7 @@ public class Question extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private QuestionType type;
 }
