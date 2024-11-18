@@ -1,8 +1,13 @@
 package com.oreo.mingle.domain.user.controller;
 
+import com.oreo.mingle.domain.user.dto.SignupRequest;
+import com.oreo.mingle.domain.user.dto.UserResponse;
 import com.oreo.mingle.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,4 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class UserController {
     private final UserService userService;
+
+    // 회원가입
+    @PostMapping("/signup")
+    public ResponseEntity<UserResponse> signup(@RequestBody SignupRequest signupRequest) {
+        log.info("signup email: {}", signupRequest.getUsername());
+        UserResponse response = userService.joinProcess(signupRequest);
+        return ResponseEntity.ok(response);
+    }
 }
