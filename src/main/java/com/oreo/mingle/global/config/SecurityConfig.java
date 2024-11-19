@@ -42,12 +42,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 허용된 경로
-        List<String> permitAllPaths = List.of(
-//                "/api/signup",
-                "/api/login"
-        );
-
         http
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -63,10 +57,10 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/login", "/api/signup").permitAll();
                     auth.anyRequest().authenticated();
                 });
-        http
-                .addFilterBefore(new JwtFilter(jwtUtil, userRepository, permitAllPaths), LoginFilter.class)
-                .addFilterBefore(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
+        http
+                .addFilterBefore(new JwtFilter(jwtUtil, userRepository), LoginFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

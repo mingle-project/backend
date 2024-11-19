@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oreo.mingle.domain.user.dto.CustomUserDetails;
 import com.oreo.mingle.domain.user.dto.LoginRequest;
 import com.oreo.mingle.domain.user.dto.UserResponse;
+import com.oreo.mingle.domain.user.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,6 +29,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         setFilterProcessesUrl("/api/login"); // 커스텀 로그인 엔드포인트 설정
+        log.info("LoginFilter 생성자");
     }
 
     @Override
@@ -35,7 +37,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
-
             String username = loginRequest.getUsername();
             String password = loginRequest.getPassword();
 
@@ -52,21 +53,20 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-        String username = customUserDetails.getUsername();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-        GrantedAuthority auth = iterator.next();
-        String role = auth.getAuthority();
+        User user = customUserDetails.user();
+        String username = user.getUsername();
+        String role = user.getRole().getValue();
+//        String role = customUserDetails.getAuthorities()
+//                .iterator()
+//                .next()
+//                .getAuthority();
         String token = jwtUtil.createJwt(username, role);
 
         response.addHeader("Authorization", "Bearer " + token);
-        response.setContentType("application/json");
-        log.info("login success");
-
-        UserResponse responseMessage = UserResponse.builder()
-                .message("로그인 성공!")
-                .build();
+        response.setContentType("application/json; charset=UTF-8");
+        UserResponse responseMessage = UserResponse.from(user, "로그인 성공!");
         new ObjectMapper().writeValue(response.getWriter(), responseMessage);
+        log.info("login success user: {}", username);
     }
 
     //로그인 실패시 실행하는 메소드
