@@ -9,5 +9,5 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class GalaxyService {
-    private final GalaxyRepository groupRepository;
+    private final GalaxyRepository galaxyRepository;
 }
