@@ -18,25 +18,27 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final List<String> permitAllPaths;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        log.info("shouldNotFilter: {} {}", path, permitAllPaths.contains(path));
-        return permitAllPaths.contains(path);
+        log.info("path: {}, {}", path, Objects.equals("/api/login", path));
+        return Objects.equals("/api/login", path);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @Nullable HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         //request에서 Authorization 헤더를 찾음
         String authorization= request.getHeader("Authorization");
+
+        log.info("request uri: {}", request.getRequestURI());
 
         //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {

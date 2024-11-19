@@ -2,18 +2,14 @@ package com.oreo.mingle.domain.user.dto;
 
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.entity.enums.Role;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class CustomUserDetails implements UserDetails {
-    private final User user;
-
-    public CustomUserDetails(User user) {
-        this.user = user;
-    }
+public record CustomUserDetails(User user) implements UserDetails {
 
     public Long getId() {
         return user.getId();
