@@ -18,6 +18,7 @@ public class Galaxy extends BaseTime {
     @Column(name = "galaxy_id")
     private Long id;
 
+    @Column(unique = true)
     private String code;
 
     private String name;
@@ -32,8 +33,18 @@ public class Galaxy extends BaseTime {
     private Relationship relationship;
 
     @Builder.Default
-    private boolean isStarted = false;
+    private Boolean isStarted = false;
 
     @Builder.Default
     private int cash = 100;
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateOptions(Gender gender, Age age, Relationship relationship) {
+        this.gender = gender;
+        this.age = age;
+        this.relationship = relationship;
+    }
 }
