@@ -17,7 +17,7 @@ public class Galaxy extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "galaxy_id")
     private Long id;
-  
+
     private String code;
 
     private String name;
