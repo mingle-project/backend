@@ -2,6 +2,8 @@ package com.oreo.mingle.domain.galaxy.service;
 
 import com.oreo.mingle.domain.galaxy.dto.*;
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
+import com.oreo.mingle.domain.galaxy.entity.enums.Age;
+import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
 import com.oreo.mingle.domain.galaxy.repository.GalaxyRepository;
 import com.oreo.mingle.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,14 @@ public class GalaxyService {
         galaxy.updateName(request.getName());
         galaxyRepository.save(galaxy);
         return GalaxyResponse.from(galaxy, "그룹명이 성공적으로 수정되었습니다.");
+    }
+
+    // 그룹 옵션 수정
+    public GalaxyResponse updateGalaxyOptions(Long galaxyId, UpdateGalaxyOptionsRequest request) {
+        Galaxy galaxy = findGalaxyById(galaxyId);
+        galaxy.updateOptions(request.getGender(), request.getAge(), request.getRelationship());
+        galaxyRepository.save(galaxy);
+        return GalaxyResponse.from(galaxy, "그룹 옵션이 성공적으로 수정되었습니다.");
     }
 
     // 그룹 코드 조회

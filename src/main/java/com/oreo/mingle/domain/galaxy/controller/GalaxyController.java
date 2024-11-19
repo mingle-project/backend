@@ -1,6 +1,7 @@
 package com.oreo.mingle.domain.galaxy.controller;
 
 import com.oreo.mingle.domain.galaxy.dto.*;
+import com.oreo.mingle.domain.galaxy.entity.enums.Relationship;
 import com.oreo.mingle.domain.galaxy.service.GalaxyService;
 import com.oreo.mingle.domain.user.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,15 @@ public class GalaxyController {
                                                            @RequestBody UpdateGalaxyNameRequest request) {
         log.info("request to PUT update galaxy name with id: {}", galaxyId);
         GalaxyResponse response = galaxyService.updateGalaxyName(galaxyId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    // 그룹 옵션 수정
+    @PutMapping("/galaxy/{galaxy_id}/options")
+    public ResponseEntity<GalaxyResponse> updateGalaxyOptions(@PathVariable Long galaxyId,
+                                                              @RequestBody UpdateGalaxyOptionsRequest request) {
+        log.info("request to PUT update galaxy options with id: {}", galaxyId);
+        GalaxyResponse response = galaxyService.updateGalaxyOptions(galaxyId, request);
         return ResponseEntity.ok(response);
     }
 
