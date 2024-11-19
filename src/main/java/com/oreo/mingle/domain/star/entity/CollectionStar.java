@@ -28,7 +28,6 @@ public class CollectionStar extends BaseTime {
     @JoinColumn(name = "galaxy_id", nullable = false)
     private Galaxy galaxy;
 
-    @Column
     private boolean isMain;
 
     public void setAsMain() {

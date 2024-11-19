@@ -21,11 +21,10 @@ import java.util.List;
 public class StarController {
     private final StarService starService;
 
-    //테스트 완료
     @GetMapping("/{galaxy_id}/stars/pet")
-    public ResponseEntity<?> getGrowingPetStar(@PathVariable Long galaxy_id) {
+    public ResponseEntity<?> getGrowingPetStar(@PathVariable("galaxy_id") Long galaxyId) {
         try {
-            PetStarResponse petStarResponse = starService.getPetStar(galaxy_id);
+            PetStarResponse petStarResponse = starService.getPetStar(galaxyId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("육성별 조회를 성공했습니다.", petStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -33,18 +32,11 @@ public class StarController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
-//    @PutMapping("/stars/{star_id}/point")
-//    public ResponseEntity<?> savingPoint(@PathVariable Long star_id){
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(null);
-//    }
-//  => 서비스 로직으로 빼기
 
-    //테스트 완료
     @GetMapping("/{galaxy_id}/stars/pet/new")
-    public ResponseEntity<?> createNewStar(@PathVariable Long galaxy_id) {
+    public ResponseEntity<?> createNewStar(@PathVariable("galaxy_id") Long galaxyId) {
         try {
-            PetStarResponse petStarResponse = starService.createNewPetStar(galaxy_id);
+            PetStarResponse petStarResponse = starService.createNewPetStar(galaxyId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("새로운 육성 별을 생성했습니다!", petStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -53,11 +45,11 @@ public class StarController {
         }
     }
 
-    //테스트 완료
-    @GetMapping("/galaxies/{galaxy_id}/stars")
-    public ResponseEntity<?> getStars(@PathVariable Long galaxy_id){
+
+    @GetMapping("/galaxy/{galaxy_id}/stars")
+    public ResponseEntity<?> getStars(@PathVariable("galaxy_id") Long galaxyId){
         try {
-            List<CollectionStarResponse> collectionStars = starService.getStars(galaxy_id);
+            List<CollectionStarResponse> collectionStars = starService.getStars(galaxyId);
             MessageResponse<List<CollectionStarResponse>> response = new MessageResponse<>("도감의 모든 별을 불러왔습니다!", collectionStars);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -65,11 +57,11 @@ public class StarController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response); // 데이터가 없을 때 404 반환
         }
     }
-    //테스트 완료
-    @PutMapping("/galaxies/{galaxy_id}/stars/choice")
-    public ResponseEntity<?> updateMainStar(@PathVariable Long galaxy_id, @RequestBody MainStarChooseRequest request) {
+
+    @PutMapping("/galaxy/{galaxy_id}/stars/choice")
+    public ResponseEntity<?> updateMainStar(@PathVariable("galaxy_id") Long galaxyId, @RequestBody MainStarChooseRequest request) {
         try {
-            CollectionStarResponse collectionStarResponse = starService.updateMainStar(galaxy_id, request.starId());
+            CollectionStarResponse collectionStarResponse = starService.updateMainStar(galaxyId, request.starId());
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("새로운 메인 별을 설정했습니다.", collectionStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -78,11 +70,10 @@ public class StarController {
         }
     }
 
-    //테스트 완료
-    @GetMapping("/galaxies/{galaxy_id}/stars/main")
-    public ResponseEntity<?> getMainCollectionStar(@PathVariable Long galaxy_id) {
+    @GetMapping("/galaxy/{galaxy_id}/stars/main")
+    public ResponseEntity<?> getMainCollectionStar(@PathVariable("galaxy_id") Long galaxyId) {
         try {
-            CollectionStarResponse collectionStarResponse = starService.getMainStar(galaxy_id);
+            CollectionStarResponse collectionStarResponse = starService.getMainStar(galaxyId);
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("메인 별 불러오기 성공했습니다!", collectionStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
