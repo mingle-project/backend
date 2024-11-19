@@ -22,11 +22,10 @@ public class Answer extends BaseTime {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id", referencedColumnName = "question_id", nullable = false)
+    @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
 }
