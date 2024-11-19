@@ -20,9 +20,9 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<UserResponse> signup(@RequestBody SignupRequest signupRequest) {
-        log.info("signup email: {}", signupRequest.getUsername());
-        UserResponse response = userService.joinProcess(signupRequest);
+    public ResponseEntity<UserResponse> signup(@RequestBody SignupRequest request) {
+        log.info("signup email: {}", request.getUsername());
+        UserResponse response = userService.joinProcess(request);
         return ResponseEntity.ok(response);
     }
 }

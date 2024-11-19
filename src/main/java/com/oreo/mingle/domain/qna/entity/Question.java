@@ -25,19 +25,11 @@ public class Question extends BaseTime {
     private QuestionType type;
   
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "galaxy_id", referencedColumnName = "galaxy_id")
+    @JoinColumn(name = "galaxy_id", nullable = false)
     private Galaxy galaxy;
 
     @Column(length = 200)
-    private String subject; // 질문 제목
+    private String subject;
 
-    @Column(columnDefinition = "TEXT", name = "content")
-    private String content; // 내용
-
-
-    @Column(name = "date")
-    public LocalDate date; // 질문 시간
-
-//    @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE) //질문 삭제시 달린 답변 삭제
-//    private List<Answer> answerList;
+    public LocalDate date;
 }
