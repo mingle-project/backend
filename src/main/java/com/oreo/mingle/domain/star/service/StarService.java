@@ -25,6 +25,7 @@ public class StarService {
     private final CollectionStarRepository collectionStarRepository;
     private final PetStarRepository petStarRepository;
 
+    //메인별 선택하기
     @Transactional
     public CollectionStarResponse updateMainStar(Long galaxyId, Long starId) {
         // 기존의 메인별이 있으면 is_main을 false로 변경
@@ -48,7 +49,25 @@ public class StarService {
                 mainstar.isMain()
         );
     }
+    //메인 별 조회하기
+    public CollectionStarResponse getMainStar(Long galaxyId) {
+        Optional<CollectionStar> optionalCollectionStar = collectionStarRepository.findByIsMainTrueAndGalaxyId(galaxyId);
 
+        if (optionalCollectionStar.isEmpty()) {
+            throw new IllegalArgumentException("해당 우주에는 메인 별이 없습니다.");
+        }
+
+        CollectionStar collectionStar = optionalCollectionStar.get();
+        return new CollectionStarResponse(
+                collectionStar.getId(),
+                collectionStar.getGalaxy().getId(),
+                collectionStar.getStar().getId(),
+                collectionStar.getStar().getName(),
+                collectionStar.isMain()
+        );
+    }
+
+    //별 목록 가지고 오기(도감)
     public List<CollectionStarResponse> getStars(Long galaxyId) {
         // CollectionStar 엔티티를 조회
         List<CollectionStar> collectionStars = collectionStarRepository.findByGalaxyId(galaxyId);
@@ -70,24 +89,7 @@ public class StarService {
                 .collect(Collectors.toList());
     }
 
-    public CollectionStarResponse getMainStar(Long galaxyId) {
-        Optional<CollectionStar> optionalCollectionStar = collectionStarRepository.findByIsMainTrueAndGalaxyId(galaxyId);
-
-        if (optionalCollectionStar.isEmpty()) {
-            throw new IllegalArgumentException("해당 우주에는 메인 별이 없습니다.");
-        }
-
-        CollectionStar collectionStar = optionalCollectionStar.get();
-        return new CollectionStarResponse(
-                collectionStar.getId(),
-                collectionStar.getGalaxy().getId(),
-                collectionStar.getStar().getId(),
-                collectionStar.getStar().getName(),
-                collectionStar.isMain()
-        );
-    }
-
-
+    //육성별 조회하기
     @Transactional(readOnly = true)
     public PetStarResponse getPetStar(Long galaxyId) {
         PetStar petStar = petStarRepository.findByGalaxyId(galaxyId)
@@ -102,6 +104,7 @@ public class StarService {
         );
     }
 
+    //새로운 별 육성하기
     @Transactional
     public PetStarResponse createNewPetStar(Long galaxyId) {
         PetStar petStar = petStarRepository.findByGalaxyId(galaxyId)
@@ -129,5 +132,23 @@ public class StarService {
                 newPetStar.getLevel(),
                 newPetStar.getPoint()
         );
+    }
+
+    //모두 답변하면 포인트 1 증가
+    public void savingPoint(Long galaxyId){
+        // PetStar 조회
+        Optional<PetStar> petStarOptional = petStarRepository.findByGalaxyId(galaxyId);
+
+        // PetStar가 존재하지 않으면 예외를 던짐
+        PetStar petStar = petStarOptional.orElseThrow(() ->
+                new IllegalArgumentException("해당 우주에 육성 별 조회를 실패했습니다.")
+        );
+
+        // 포인트 증가 로직
+        int currentPoint = petStar.getPoint();
+        petStar.changePoint(currentPoint + 1);
+
+        // 변경된 PetStar를 저장
+        petStarRepository.save(petStar);
     }
 }

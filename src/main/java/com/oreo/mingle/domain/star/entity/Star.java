@@ -18,13 +18,10 @@ public class Star {
     @Column(name = "star_id")
     private Long id;
 
-    @Column
     private String name;
 
-    @Column
     private String image;
 
-    @Column
     private String color;
 
     @Enumerated(EnumType.STRING)
