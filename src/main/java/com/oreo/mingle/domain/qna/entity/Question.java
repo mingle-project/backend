@@ -1,6 +1,7 @@
 package com.oreo.mingle.domain.qna.entity;
 
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
+import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.global.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,6 +24,9 @@ public class Question extends BaseTime {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "galaxy_id", referencedColumnName = "galaxy_id")
     private Galaxy galaxy;
+
+    @Enumerated(EnumType.STRING) // Enum 타입 저장
+    private QuestionType type; // 질문 유형
 
     @Column(length = 200)
     private String subject; // 질문 제목
