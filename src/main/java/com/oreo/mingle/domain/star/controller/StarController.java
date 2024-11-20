@@ -21,7 +21,7 @@ import java.util.List;
 public class StarController {
     private final StarService starService;
 
-    @GetMapping("/{galaxy_id}/stars/pet")
+    @GetMapping("/galaxy/{galaxy_id}/stars/pet")
     public ResponseEntity<?> getGrowingPetStar(@PathVariable("galaxy_id") Long galaxyId) {
         log.info("request to GET galaxy profile with id: {}", galaxyId);
         try {
@@ -34,7 +34,7 @@ public class StarController {
         }
     }
 
-    @GetMapping("/{galaxy_id}/stars/pet/new")
+    @GetMapping("/galaxy/{galaxy_id}/stars/pet/new")
     public ResponseEntity<?> createNewStar(@PathVariable("galaxy_id") Long galaxyId) {
         log.info("request to GET galaxy profile with id: {}", galaxyId);
         try {
