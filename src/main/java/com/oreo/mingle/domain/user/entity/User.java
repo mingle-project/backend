@@ -30,4 +30,8 @@ public class User extends BaseTime {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "galaxy_id")
     private Galaxy galaxy;
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

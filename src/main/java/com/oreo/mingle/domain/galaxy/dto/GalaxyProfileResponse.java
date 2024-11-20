@@ -6,8 +6,11 @@ import com.oreo.mingle.domain.galaxy.entity.Galaxy;
 import com.oreo.mingle.domain.galaxy.entity.enums.Age;
 import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
 import com.oreo.mingle.domain.galaxy.entity.enums.Relationship;
+import com.oreo.mingle.domain.user.dto.UserResponse;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @Builder
@@ -22,8 +25,9 @@ public class GalaxyProfileResponse {
     private Boolean isStarted;
     private int cash;
     private int usersCount;
+    private List<UserResponse> users;
 
-    public static GalaxyProfileResponse from(Galaxy galaxy, int usersCount) {
+    public static GalaxyProfileResponse from(Galaxy galaxy, int usersCount, List<UserResponse> users) {
         return GalaxyProfileResponse.builder()
                 .galaxyId(galaxy.getId())
                 .code(galaxy.getCode())
@@ -34,6 +38,7 @@ public class GalaxyProfileResponse {
                 .isStarted(galaxy.getIsStarted())
                 .cash(galaxy.getCash())
                 .usersCount(usersCount)
+                .users(users)
                 .build();
     }
 }

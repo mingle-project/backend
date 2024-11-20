@@ -5,11 +5,13 @@ import com.oreo.mingle.domain.galaxy.entity.Galaxy;
 import com.oreo.mingle.domain.galaxy.entity.enums.Age;
 import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
 import com.oreo.mingle.domain.galaxy.repository.GalaxyRepository;
+import com.oreo.mingle.domain.user.dto.UserResponse;
 import com.oreo.mingle.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -43,8 +45,13 @@ public class GalaxyService {
     // 그룹 프로필 조회
     public GalaxyProfileResponse getGalaxyProfile(Long galaxyId) {
         Galaxy galaxy = findGalaxyById(galaxyId);
-        return GalaxyProfileResponse.from(galaxy, userRepository.countByGalaxy(galaxy));
+        int usersCount = userRepository.countByGalaxy(galaxy);
+        List<UserResponse> users = userRepository.findByGalaxy(galaxy).stream()
+                .map(user -> UserResponse.from(user, null))
+                .toList();
+        return GalaxyProfileResponse.from(galaxy, usersCount, users);
     }
+
 
     // 그룹명 수정
     public GalaxyResponse updateGalaxyName(Long galaxyId, UpdateGalaxyNameRequest request) {
