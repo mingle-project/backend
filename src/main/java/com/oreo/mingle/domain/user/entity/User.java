@@ -25,6 +25,7 @@ public class User extends BaseTime {
 
     private String image;
 
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY)
