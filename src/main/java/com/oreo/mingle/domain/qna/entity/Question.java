@@ -22,9 +22,6 @@ public class Question extends BaseTime {
     @Column(name = "question_id")
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private QuestionType type;
-  
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "galaxy_id", nullable = false)
     private Galaxy galaxy;

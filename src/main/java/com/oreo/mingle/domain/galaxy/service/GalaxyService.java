@@ -96,4 +96,9 @@ public class GalaxyService {
         }
         return code;
     }
+
+    public Galaxy findGalaxyById(Long galaxyId) {
+        return galaxyRepository.findById(galaxyId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 Galaxy를 찾을 수 없습니다."));
+    }
 }

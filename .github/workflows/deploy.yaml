@@ -26,8 +26,8 @@ jobs:
           script: |
             cd /home/ubuntu/backend
             rm -rf src/main/resources/application.yaml
-            git rebase --abort
-            rm -rf .git/rebase-merge
+#            git rebase --abort
+#            rm -rf .git/rebase-merge
             git pull origin develop --rebase
             echo "$APPLICATION_PROPERTIES" > src/main/resources/application.yaml
             ./gradlew clean build -x test
