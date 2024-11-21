@@ -40,4 +40,12 @@ public class UserController {
         UserResponse response = userService.deleteUserFromGroup(userId, galaxyId);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/users/me/profile")
+    public ResponseEntity<UserResponse> getProfile(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to PUT user nickname with id: {}", userId);
+        UserResponse response = userService.getProfile(userId);
+        return ResponseEntity.ok(response);
+    }
 }
