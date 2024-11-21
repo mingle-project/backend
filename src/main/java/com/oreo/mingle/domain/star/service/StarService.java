@@ -50,6 +50,9 @@ public class StarService {
                 mainstar.getGalaxy().getId(),
                 mainstar.getStar().getId(),
                 mainstar.getStar().getName(),
+                mainstar.getStar().getColor(),
+                mainstar.getStar().getImage(),
+                mainstar.getStar().getRarity(),
                 mainstar.isMain()
         );
     }
@@ -67,6 +70,9 @@ public class StarService {
                 collectionStar.getGalaxy().getId(),
                 collectionStar.getStar().getId(),
                 collectionStar.getStar().getName(),
+                collectionStar.getStar().getColor(),
+                collectionStar.getStar().getImage(),
+                collectionStar.getStar().getRarity(),
                 collectionStar.isMain()
         );
     }
@@ -87,7 +93,10 @@ public class StarService {
                         star.getId(),
                         star.getGalaxy().getId(),
                         star.getStar().getId(),
-                        star.getStar().getName(), // 필요한 경우 추가 필드
+                        star.getStar().getName(),
+                        star.getStar().getColor(),
+                        star.getStar().getImage(),
+                        star.getStar().getRarity(), // 필요한 경우 추가 필드
                         star.isMain()
                 ))
                 .collect(Collectors.toList());
@@ -104,6 +113,10 @@ public class StarService {
                 petStar.getId(),
                 petStar.getGalaxy().getId(),
                 petStar.getStar().getId(),
+                petStar.getStar().getName(),
+                petStar.getStar().getColor(),
+                petStar.getStar().getImage(),
+                petStar.getStar().getRarity(),
                 petStar.getLevel(),
                 petStar.getPoint()
         );
@@ -113,31 +126,65 @@ public class StarService {
     @Transactional
     public PetStarResponse createNewPetStar(Long galaxyId) {
         Galaxy galaxy = galaxyService.findGalaxyById(galaxyId);
-        PetStar petStar = petStarRepository.findByGalaxy(galaxy)
-                .orElseThrow(() -> new IllegalArgumentException("해당 우주에 육성별은 존재하지 않습니다"));
 
-        CollectionStar collectionStar = CollectionStar.builder()
-                .galaxy(petStar.getGalaxy())
-                .star(petStar.getStar())
-                .isMain(false)
-                .build();
-        collectionStarRepository.save(collectionStar);
+        // Galaxy에 해당하는 육성별(PetStar) 찾기
+        PetStar petStar = petStarRepository.findByGalaxy(galaxy).orElse(null);
 
-        Star randomStar = starRepository.findRandomStar()
-                .orElseThrow(() -> new IllegalStateException("랜덤 별을 가져올 수 없습니다."));
+        if (petStar == null) {
+            // 육성별이 없을 경우: 새로운 육성별 생성
+            Star randomStar = starRepository.findRandomStar()
+                    .orElseThrow(() -> new IllegalStateException("랜덤 별을 가져올 수 없습니다."));
 
-        // PetStar의 상태 변경
-        petStar.changeStar(randomStar);
-        petStar.resetLevelAndPoints();
-        PetStar newPetStar = petStarRepository.save(petStar);
+            petStar = PetStar.builder()
+                    .galaxy(galaxy)
+                    .star(randomStar)
+                    .level(1) // 초기 레벨
+                    .point(0) // 초기 포인트
+                    .build();
 
-        return new PetStarResponse(
-                newPetStar.getId(),
-                newPetStar.getGalaxy().getId(),
-                newPetStar.getStar().getId(),
-                newPetStar.getLevel(),
-                newPetStar.getPoint()
-        );
+            PetStar newPetStar = petStarRepository.save(petStar);
+
+            return new PetStarResponse(
+                    newPetStar.getId(),
+                    newPetStar.getGalaxy().getId(),
+                    newPetStar.getStar().getId(),
+                    newPetStar.getStar().getName(),
+                    newPetStar.getStar().getColor(),
+                    newPetStar.getStar().getImage(),
+                    newPetStar.getStar().getRarity(),
+                    newPetStar.getLevel(),
+                    newPetStar.getPoint()
+            );
+        } else {
+            // 육성별이 이미 존재할 경우: 기존 육성별을 CollectionStar로 이동
+            CollectionStar collectionStar = CollectionStar.builder()
+                    .galaxy(petStar.getGalaxy())
+                    .star(petStar.getStar())
+                    .isMain(false)
+                    .build();
+            collectionStarRepository.save(collectionStar);
+
+            // 새로운 랜덤 별 가져오기
+            Star randomStar = starRepository.findRandomStar()
+                    .orElseThrow(() -> new IllegalStateException("랜덤 별을 가져올 수 없습니다."));
+
+            // PetStar의 상태 변경
+            petStar.changeStar(randomStar);
+            petStar.resetLevelAndPoints();
+            PetStar updatedPetStar = petStarRepository.save(petStar);
+
+            return new PetStarResponse(
+                    updatedPetStar.getId(),
+                    updatedPetStar.getGalaxy().getId(),
+                    updatedPetStar.getStar().getId(),
+                    updatedPetStar.getStar().getName(),
+                    updatedPetStar.getStar().getColor(),
+                    updatedPetStar.getStar().getImage(),
+                    updatedPetStar.getStar().getRarity(),
+                    updatedPetStar.getLevel(),
+                    updatedPetStar.getPoint()
+            );
+        }
     }
 
     //모두 답변하면 포인트 1 증가
