@@ -33,7 +33,7 @@ public class StarController {
         }
     }
 
-    @GetMapping("/{galaxy_id}/stars/pet/new")
+    @GetMapping("/galaxy/{galaxy_id}/stars/pet/new")
     public ResponseEntity<?> createNewStar(@PathVariable("galaxy_id") Long galaxyId) {
         try {
             PetStarResponse petStarResponse = starService.createNewPetStar(galaxyId);
