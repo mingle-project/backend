@@ -53,4 +53,9 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 User를 찾을 수 없습니다."));
     }
+    
+    public UserResponse getProfile(Long userId) {
+        User user = findUserByUserId(userId);
+        return UserResponse.from(user,"사용자 조회 성공");
+    }
 }
