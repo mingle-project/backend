@@ -1,5 +1,6 @@
 package com.oreo.mingle.domain.user.service;
 
+import com.oreo.mingle.domain.galaxy.entity.Galaxy;
 import com.oreo.mingle.domain.qna.entity.Question;
 import com.oreo.mingle.domain.user.dto.SignupRequest;
 import com.oreo.mingle.domain.user.dto.UserResponse;
@@ -43,13 +44,14 @@ public class UserService {
         return UserResponse.from(user, message);
     }
 
-    public UserResponse deleteUserFromGroup(Long userId, Long galaxyId) {
+    public UserResponse deleteUserFromGroup(Long userId) {
         User user = findUserByUserId(userId);
-        userRepository.delete(user);
-        return UserResponse.from(user, "사용자가 삭제되었습니다.");
+        user.leaveGalaxy();
+        userRepository.save(user);
+        return UserResponse.from(user, "그룹에서 탈퇴했습니다.");
     }
 
-    private User findUserByUserId(Long userId) {
+    public User findUserByUserId(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 User를 찾을 수 없습니다."));
     }
