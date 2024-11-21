@@ -1,12 +1,12 @@
 package com.oreo.mingle.domain.galaxy.controller;
 
 import com.oreo.mingle.domain.galaxy.dto.*;
-import com.oreo.mingle.domain.galaxy.entity.enums.Relationship;
 import com.oreo.mingle.domain.galaxy.service.GalaxyService;
-import com.oreo.mingle.domain.user.dto.UserResponse;
+import com.oreo.mingle.domain.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -18,25 +18,28 @@ public class GalaxyController {
 
     // 그룹 생성
     @PostMapping("/galaxy")
-    public ResponseEntity<GalaxyResponse> postGalaxy(@RequestBody CreateGalaxyRequest request) {
+    public ResponseEntity<GalaxyResponse> postGalaxy(Authentication authentication, @RequestBody CreateGalaxyRequest request) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("request to POST galaxy: {}", request.getName());
-        GalaxyResponse response = galaxyService.createGalaxy(request);
+        GalaxyResponse response = galaxyService.createGalaxy(userId, request);
         return ResponseEntity.ok(response);
     }
 
     // 그룹 참여
     @PostMapping("/galaxy/join")
-    public ResponseEntity<GalaxyResponse> postGalaxyJoin(@RequestBody JoinGalaxyRequest request) {
+    public ResponseEntity<GalaxyResponse> postGalaxyJoin(Authentication authentication, @RequestBody JoinGalaxyRequest request) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("request to POST join galaxy by code: {}", request.getGroupCode());
-        GalaxyResponse response = galaxyService.joinGalaxyByCode(request.getGroupCode());
+        GalaxyResponse response = galaxyService.joinGalaxyByCode(userId, request.getGroupCode());
         return ResponseEntity.ok(response);
     }
 
     // 그룹 프로필 조회
-    @GetMapping("/galaxy/{galaxy_id}/profile")
-    public ResponseEntity<GalaxyProfileResponse> getGalaxyProfile(@PathVariable("galaxy_id") Long galaxyId) {
-        log.info("request to GET galaxy profile with id: {}", galaxyId);
-        GalaxyProfileResponse response = galaxyService.getGalaxyProfile(galaxyId);
+    @GetMapping("/galaxy/me/profile")
+    public ResponseEntity<GalaxyProfileResponse> getGalaxyProfile(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to GET my galaxy profile: {}", userId);
+        GalaxyProfileResponse response = galaxyService.getMyGalaxyProfile(userId);
         return ResponseEntity.ok(response);
     }
 

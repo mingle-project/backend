@@ -35,4 +35,12 @@ public class User extends BaseTime {
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
+
+    public void joinGalaxy(Galaxy galaxy) {
+        this.galaxy = galaxy;
+    }
+
+    public void leaveGalaxy() {
+        this.galaxy = null;
+    }
 }

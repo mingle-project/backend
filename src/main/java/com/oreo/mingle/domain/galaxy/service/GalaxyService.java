@@ -2,11 +2,11 @@ package com.oreo.mingle.domain.galaxy.service;
 
 import com.oreo.mingle.domain.galaxy.dto.*;
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
-import com.oreo.mingle.domain.galaxy.entity.enums.Age;
-import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
 import com.oreo.mingle.domain.galaxy.repository.GalaxyRepository;
 import com.oreo.mingle.domain.user.dto.UserResponse;
+import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
+import com.oreo.mingle.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GalaxyService {
     private final GalaxyRepository galaxyRepository;
-
     private final UserRepository userRepository;
 
+    private final UserService userService;
+
     // 그룹 생성
-    public GalaxyResponse createGalaxy(CreateGalaxyRequest request) {
+    public GalaxyResponse createGalaxy(Long userId, CreateGalaxyRequest request) {
         String code = generateGroupCode();
         Galaxy newGalaxy = Galaxy.builder()
                 .name(request.getName())
@@ -33,22 +34,31 @@ public class GalaxyService {
                 .relationship(request.getRelationship())
                 .build();
         galaxyRepository.save(newGalaxy);
+
+        User user = userService.findUserByUserId(userId);
+        user.joinGalaxy(newGalaxy);
+        userRepository.save(user);
+
         return GalaxyResponse.from(newGalaxy, "그룹이 성공적으로 생성되었습니다.");
     }
 
     // 그룹 참여
-    public GalaxyResponse joinGalaxyByCode(String code) {
+    public GalaxyResponse joinGalaxyByCode(Long userId, String code) {
         Galaxy galaxy = galaxyRepository.findByCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("해당 코드를 가진 Galaxy를 찾을 수 없습니다."));
+        User user = userService.findUserByUserId(userId);
+        user.joinGalaxy(galaxy);
+        userRepository.save(user);
         return GalaxyResponse.from(galaxy, "그룹에 성공적으로 참여하였습니다.");
     }
 
     // 그룹 프로필 조회
-    public GalaxyProfileResponse getGalaxyProfile(Long galaxyId) {
-        Galaxy galaxy = findGalaxyById(galaxyId);
+    public GalaxyProfileResponse getMyGalaxyProfile(Long userId) {
+        User user = userService.findUserByUserId(userId);
+        Galaxy galaxy = user.getGalaxy();
         int usersCount = userRepository.countByGalaxy(galaxy);
         List<UserResponse> users = userRepository.findByGalaxy(galaxy).stream()
-                .map(user -> UserResponse.from(user, null))
+                .map(member -> UserResponse.from(member, null))
                 .toList();
         return GalaxyProfileResponse.from(galaxy, usersCount, users);
     }
