@@ -41,7 +41,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/users/me/profile")
+    @GetMapping("/users/me/profile")
     public ResponseEntity<UserResponse> getProfile(Authentication authentication) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("request to PUT user nickname with id: {}", userId);
