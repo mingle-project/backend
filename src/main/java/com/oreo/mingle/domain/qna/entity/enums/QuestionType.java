@@ -24,17 +24,17 @@ public enum QuestionType {
 
     private final String value;
 
-    @JsonCreator
+    @JsonCreator // JSON 역직렬화 시, 주어진 문자값 -> 열겨형 상수로 변환
     public static Gender deserializer(String value) {
-        for(Gender gender : Gender.values()){
-            if(gender.getValue().equals(value)) {
+        for (Gender gender : Gender.values()) {
+            if (gender.getValue().equals(value)) {
                 return gender;
             }
         }
         return null;
     }
 
-    @JsonValue
+    @JsonValue // JSON 직렬화 시, 열거형 상수(객체) -> 대응된 문자값(JSON)로 변환
     public String serializer(){
         return value;
     }

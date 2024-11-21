@@ -6,6 +6,8 @@ import com.oreo.mingle.global.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import javax.management.relation.Role;
+
 @Entity
 @Getter
 @Builder

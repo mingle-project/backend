@@ -1,5 +1,7 @@
 package com.oreo.mingle.domain.star.service;
 
+import com.oreo.mingle.domain.galaxy.entity.Galaxy;
+import com.oreo.mingle.domain.galaxy.service.GalaxyService;
 import com.oreo.mingle.domain.star.dto.response.CollectionStarResponse;
 import com.oreo.mingle.domain.star.dto.response.PetStarResponse;
 import com.oreo.mingle.domain.star.entity.CollectionStar;
@@ -24,6 +26,8 @@ public class StarService {
     private final StarRepository starRepository;
     private final CollectionStarRepository collectionStarRepository;
     private final PetStarRepository petStarRepository;
+
+    private final GalaxyService galaxyService;
 
     //메인별 선택하기
     @Transactional
@@ -92,7 +96,8 @@ public class StarService {
     //육성별 조회하기
     @Transactional(readOnly = true)
     public PetStarResponse getPetStar(Long galaxyId) {
-        PetStar petStar = petStarRepository.findByGalaxyId(galaxyId)
+        Galaxy galaxy = galaxyService.findGalaxyById(galaxyId);
+        PetStar petStar = petStarRepository.findByGalaxy(galaxy)
                 .orElseThrow(() -> new IllegalArgumentException("해당 우주에는 해당하는 육성별이 존재하지 않습니다."));
 
         return new PetStarResponse(
@@ -107,7 +112,8 @@ public class StarService {
     //새로운 별 육성하기
     @Transactional
     public PetStarResponse createNewPetStar(Long galaxyId) {
-        PetStar petStar = petStarRepository.findByGalaxyId(galaxyId)
+        Galaxy galaxy = galaxyService.findGalaxyById(galaxyId);
+        PetStar petStar = petStarRepository.findByGalaxy(galaxy)
                 .orElseThrow(() -> new IllegalArgumentException("해당 우주에 육성별은 존재하지 않습니다"));
 
         CollectionStar collectionStar = CollectionStar.builder()
@@ -136,8 +142,9 @@ public class StarService {
 
     //모두 답변하면 포인트 1 증가
     public void savingPoint(Long galaxyId){
+        Galaxy galaxy = galaxyService.findGalaxyById(galaxyId);
         // PetStar 조회
-        Optional<PetStar> petStarOptional = petStarRepository.findByGalaxyId(galaxyId);
+        Optional<PetStar> petStarOptional = petStarRepository.findByGalaxy(galaxy);
 
         // PetStar가 존재하지 않으면 예외를 던짐
         PetStar petStar = petStarOptional.orElseThrow(() ->

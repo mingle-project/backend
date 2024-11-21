@@ -19,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GalaxyService {
     private final GalaxyRepository galaxyRepository;
+
     private final UserRepository userRepository;
 
     // 그룹 생성
@@ -94,10 +95,5 @@ public class GalaxyService {
             return generateGroupCode();
         }
         return code;
-    }
-
-    public Galaxy findGalaxyById(Long galaxyId) {
-        return galaxyRepository.findById(galaxyId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 Galaxy를 찾을 수 없습니다."));
     }
 }

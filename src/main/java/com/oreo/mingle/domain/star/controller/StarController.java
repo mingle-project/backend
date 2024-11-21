@@ -20,10 +20,9 @@ import java.util.List;
 @RequestMapping("/api")
 public class StarController {
     private final StarService starService;
-
+  
     @GetMapping("/galaxy/{galaxy_id}/stars/pet")
     public ResponseEntity<?> getGrowingPetStar(@PathVariable("galaxy_id") Long galaxyId) {
-        log.info("request to GET galaxy profile with id: {}", galaxyId);
         try {
             PetStarResponse petStarResponse = starService.getPetStar(galaxyId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("육성별 조회를 성공했습니다.", petStarResponse);
@@ -34,9 +33,8 @@ public class StarController {
         }
     }
 
-    @GetMapping("/galaxy/{galaxy_id}/stars/pet/new")
+    @GetMapping("/{galaxy_id}/stars/pet/new")
     public ResponseEntity<?> createNewStar(@PathVariable("galaxy_id") Long galaxyId) {
-        log.info("request to GET galaxy profile with id: {}", galaxyId);
         try {
             PetStarResponse petStarResponse = starService.createNewPetStar(galaxyId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("새로운 육성 별을 생성했습니다!", petStarResponse);
@@ -50,7 +48,6 @@ public class StarController {
 
     @GetMapping("/galaxy/{galaxy_id}/stars")
     public ResponseEntity<?> getStars(@PathVariable("galaxy_id") Long galaxyId){
-        log.info("request to GET galaxy profile with id: {}", galaxyId);
         try {
             List<CollectionStarResponse> collectionStars = starService.getStars(galaxyId);
             MessageResponse<List<CollectionStarResponse>> response = new MessageResponse<>("도감의 모든 별을 불러왔습니다!", collectionStars);
@@ -63,7 +60,6 @@ public class StarController {
 
     @PutMapping("/galaxy/{galaxy_id}/stars/choice")
     public ResponseEntity<?> updateMainStar(@PathVariable("galaxy_id") Long galaxyId, @RequestBody MainStarChooseRequest request) {
-        log.info("request to PUT update galaxy name with id: {}", galaxyId);
         try {
             CollectionStarResponse collectionStarResponse = starService.updateMainStar(galaxyId, request.starId());
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("새로운 메인 별을 설정했습니다.", collectionStarResponse);
@@ -76,7 +72,6 @@ public class StarController {
 
     @GetMapping("/galaxy/{galaxy_id}/stars/main")
     public ResponseEntity<?> getMainCollectionStar(@PathVariable("galaxy_id") Long galaxyId) {
-        log.info("request to GET galaxy profile with id: {}", galaxyId);
         try {
             CollectionStarResponse collectionStarResponse = starService.getMainStar(galaxyId);
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("메인 별 불러오기 성공했습니다!", collectionStarResponse);
@@ -88,3 +83,4 @@ public class StarController {
     }
 
 }
+
