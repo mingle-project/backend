@@ -1,5 +1,6 @@
 package com.oreo.mingle.domain.qna.entity;
 
+import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
 import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.global.entity.BaseTime;
@@ -21,23 +22,18 @@ public class Question extends BaseTime {
     @Column(name = "question_id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private QuestionType type;
+  
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "galaxy_id", referencedColumnName = "galaxy_id")
+    @JoinColumn(name = "galaxy_id", nullable = false)
     private Galaxy galaxy;
 
     @Enumerated(EnumType.STRING) // Enum 타입 저장
     private QuestionType type; // 질문 유형
 
     @Column(length = 200)
-    private String subject; // 질문 제목
+    private String subject;
 
-    @Column(columnDefinition = "TEXT", name = "content")
-    private String content; // 내용
-
-
-    @Column(name = "date")
-    public LocalDate date; // 질문 시간
-
-//    @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE) //질문 삭제시 달린 답변 삭제
-//    private List<Answer> answerList;
+    public LocalDate date;
 }

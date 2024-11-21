@@ -1,6 +1,5 @@
 package com.oreo.mingle.domain.qna.entity.enums;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.oreo.mingle.domain.galaxy.entity.enums.Gender;

@@ -20,8 +20,8 @@ import java.util.List;
 @RequestMapping("/api")
 public class StarController {
     private final StarService starService;
-
-    @GetMapping("/{galaxy_id}/stars/pet")
+  
+    @GetMapping("/galaxy/{galaxy_id}/stars/pet")
     public ResponseEntity<?> getGrowingPetStar(@PathVariable("galaxy_id") Long galaxyId) {
         try {
             PetStarResponse petStarResponse = starService.getPetStar(galaxyId);

@@ -8,5 +8,4 @@ import java.util.Optional;
 
 public interface PetStarRepository extends JpaRepository<PetStar, Long> {
     Optional<PetStar> findByGalaxy(Galaxy galaxy);
-
 }
