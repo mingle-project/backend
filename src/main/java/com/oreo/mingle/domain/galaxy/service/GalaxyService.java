@@ -73,41 +73,36 @@ public class GalaxyService {
     }
 
     // 그룹명 수정
-    public GalaxyResponse updateGalaxyName(Long galaxyId, UpdateGalaxyNameRequest request) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
+    public GalaxyResponse updateGalaxyName(Long userId, UpdateGalaxyNameRequest request) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         galaxy.updateName(request.getName());
         galaxyRepository.save(galaxy);
         return GalaxyResponse.from(galaxy, "그룹명이 성공적으로 수정되었습니다.");
     }
 
     // 그룹 옵션 수정
-    public GalaxyResponse updateGalaxyOptions(Long galaxyId, UpdateGalaxyOptionsRequest request) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
+    public GalaxyResponse updateGalaxyOptions(Long userId, UpdateGalaxyOptionsRequest request) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         galaxy.updateOptions(request.getGender(), request.getAge(), request.getRelationship());
         galaxyRepository.save(galaxy);
         return GalaxyResponse.from(galaxy, "그룹 옵션이 성공적으로 수정되었습니다.");
     }
 
     // 그룹 코드 조회
-    public String getGalaxyCode(Long galaxyId) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
+    public String getGalaxyCode(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         return galaxy.getCode();
     }
 
     // 그룹 삭제
-    public GalaxyResponse deleteGalaxy(Long galaxyId) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
-
-        // Galaxy에 속한 모든 사용자 탈퇴 처리
+    public GalaxyResponse deleteGalaxy(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         List<User> users = userRepository.findByGalaxy(galaxy);
         for (User user : users) {
-            user.leaveGalaxy(); // 사용자의 Galaxy 관계를 null로 설정
-            userRepository.save(user); // 변경 사항 저장
+            user.leaveGalaxy();
+            userRepository.save(user);
         }
-
-        // Galaxy 삭제
         galaxyRepository.delete(galaxy);
-
         return GalaxyResponse.from(galaxy, "그룹이 성공적으로 삭제되었습니다.");
     }
 
