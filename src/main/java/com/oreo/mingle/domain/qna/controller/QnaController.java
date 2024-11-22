@@ -34,7 +34,7 @@ public class QnaController {
     }
 
     // 질문 답변 작성
-    @PostMapping("/questions/{questionId}/answers")
+    @PostMapping("/questions/{question_id}/answers")
     public ResponseEntity<AnswerResponse> submitAnswer(Authentication authentication, @PathVariable("question_id") Long questionId, @RequestBody AnswerRequest request) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("Request to POST answer: questionId={}, userId={}, content={}", questionId, userId, request.getContent());
