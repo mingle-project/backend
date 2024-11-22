@@ -118,8 +118,8 @@ public class GalaxyService {
 
     // 캐시 조회
     @Transactional(readOnly = true)
-    public CashResponse getGalaxyCash(Long galaxyId) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
+    public CashResponse getGalaxyCash(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         return CashResponse.from(galaxy);
     }
 
