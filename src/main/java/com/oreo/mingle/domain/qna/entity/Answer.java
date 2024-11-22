@@ -21,7 +21,7 @@ public class Answer extends BaseTime {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 

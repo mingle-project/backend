@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ public class QnaService {
     private final GlobalService globalService;
 
     // 1. groupId와 date를 사용해 당일 질문 조회
+    @Transactional(readOnly = true)
     public QuestionResponse findTodayQuestion(Long userId) {
         Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         Question question = globalService.getOrCreateQuestion(galaxy);
@@ -50,6 +52,7 @@ public class QnaService {
     }
 
     // 2. 질문 답변 작성
+    @Transactional
     public AnswerResponse submitAnswer(Long userId, Long questionId, String content) {
         User user = globalService.findUserByUserId(userId);
         Question question = findQuestionByQuestionId(questionId);
@@ -66,6 +69,7 @@ public class QnaService {
     }
 
     //3 모든 답변이 완료됐는지 확인
+    @Transactional(readOnly = true)
     private boolean checkAllAnswered(Question question) {
         Galaxy galaxy = question.getGalaxy();
         int usersCount = userRepository.countByGalaxy(galaxy);
@@ -74,6 +78,7 @@ public class QnaService {
     }
 
     // 4. 현재까지 받은 질문 목록 조회
+    @Transactional(readOnly = true)
     public QuestionListResponse getReceivedQuestionsByUser(Long userId) {
         Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         List<Question> questions = questionRepository.findByGalaxy(galaxy);
@@ -89,6 +94,7 @@ public class QnaService {
     }
 
     // 5. 현재까지 답한 질문들의 답변 조회
+    @Transactional(readOnly = true)
     public AnswerListResponse getAnswerListByUser(Long userId, Long questionId) {
         User user = globalService.findUserByUserId(userId);
         Question question = findQuestionByQuestionId(questionId);
@@ -115,6 +121,7 @@ public class QnaService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     private Question findQuestionByQuestionId(Long question) {
         return questionRepository.findById(question)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 Question을 찾을 수 없습니다."));

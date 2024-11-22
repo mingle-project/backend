@@ -19,7 +19,7 @@ public class Question extends BaseTime {
     @Column(name = "question_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "galaxy_id", nullable = false)
     private Galaxy galaxy;
 
