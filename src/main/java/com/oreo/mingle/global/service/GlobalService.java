@@ -10,13 +10,11 @@ import com.oreo.mingle.domain.galaxy.repository.GalaxyRepository;
 import com.oreo.mingle.domain.qna.entity.Question;
 import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.domain.qna.repository.QuestionRepository;
-import com.oreo.mingle.domain.qna.service.QnaService;
 import com.oreo.mingle.domain.star.entity.PetStar;
 import com.oreo.mingle.domain.star.repository.PetStarRepository;
-import com.oreo.mingle.domain.star.service.StarService;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
-import com.oreo.mingle.domain.user.service.UserService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +33,22 @@ public class GlobalService {
     private final UserRepository userRepository;
     private final GalaxyRepository galaxyRepository;
     private final PetStarRepository petStarRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+    private Map<String, List<String>> questionsMap;
+
+    @PostConstruct
+    public void initQuestionsMap() {
+        try (InputStream inputStream = getClass().getResourceAsStream("/static/qnas.json")) {
+            if (inputStream == null) {
+                throw new IllegalArgumentException("qnas.json 파일을 찾을 수 없습니다.");
+            }
+            this.questionsMap = objectMapper.readValue(inputStream, new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new RuntimeException("qnas.json 파일 로드 중 오류가 발생했습니다.", e);
+        }
+    }
 
     public User findUserByUserId(Long userId) {
         return userRepository.findById(userId)
@@ -65,15 +79,10 @@ public class GlobalService {
         petStarRepository.save(petStar);
     }
 
-    @Autowired
-    private ObjectMapper objectMapper;
-    private Map<String, List<String>> questionsMap;
-    public void QuestionService() throws IOException {
-        InputStream inputStream = getClass().getResourceAsStream("/static/qnas.json");
-        this.questionsMap = objectMapper.readValue(inputStream, new TypeReference<>() {});
-    }
-
     public Question getOrCreateQuestion(Galaxy galaxy) {
+        if (this.questionsMap == null) {
+            throw new IllegalStateException("questionsMap이 초기화되지 않았습니다.");
+        }
         LocalDate today = LocalDate.now();
         Optional<Question> existingQuestion = questionRepository.findByGalaxyAndDate(galaxy, today);
         if (existingQuestion.isPresent()) {
@@ -83,7 +92,7 @@ public class GlobalService {
         long questionCount = questionRepository.countByGalaxy(galaxy);
         List<String> typeQuestions = questionsMap.get(type.name());
         int questionIndex = (int) (questionCount % typeQuestions.size());
-        String selectedQuestion = typeQuestions.get(questionIndex+1);
+        String selectedQuestion = typeQuestions.get(questionIndex);
         Question newQuestion = Question.builder()
                 .galaxy(galaxy)
                 .type(type)
