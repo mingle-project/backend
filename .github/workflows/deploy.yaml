@@ -22,14 +22,16 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          envs: APPLICATION_PROPERTIES
+          envs: |
+            APPLICATION_PROPERTIES
+            QNAS
           script_stop: true
           script: |
             cd /home/ubuntu/backend
             rm -rf src/main/resources/application.yaml
             git pull origin develop --rebase
             echo "$APPLICATION_PROPERTIES" > src/main/resources/application.yaml
-            echo "$QNAS" > src/main/resources/static/qnas.json
+            echo "$QNAS" | jq . > src/main/resources/static/qnas.json || echo "Invalid JSON data"
             ./gradlew clean build -x test
             sudo fuser -k -n tcp 8080 || true
             nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
