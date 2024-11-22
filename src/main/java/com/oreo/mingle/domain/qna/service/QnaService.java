@@ -47,7 +47,7 @@ public class QnaService {
     @Transactional(readOnly = true)
     public QuestionResponse findTodayQuestion(Long userId) {
         Galaxy galaxy = globalService.findGalaxyByUserId(userId);
-        if (galaxy.getIsStarted()) {
+        if (!galaxy.getIsStarted()) {
             throw new IllegalStateException("아직 질문이 시작되지 않았습니다.");
         }
         Question question = globalService.getOrCreateQuestion(galaxy);
