@@ -26,5 +26,4 @@ public class Star {
 
     @Enumerated(EnumType.STRING)
     private Rarity rarity;
-
 }

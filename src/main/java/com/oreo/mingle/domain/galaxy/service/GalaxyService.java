@@ -8,6 +8,7 @@ import com.oreo.mingle.domain.user.dto.UserResponse;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
 import com.oreo.mingle.domain.user.service.UserService;
+import com.oreo.mingle.global.dto.MessageResponse;
 import com.oreo.mingle.global.service.GlobalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +105,7 @@ public class GalaxyService {
 
     // 그룹 삭제
     @Transactional
-    public GalaxyResponse deleteGalaxy(Long userId) {
+    public MessageResponse deleteGalaxy(Long userId) {
         Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         List<User> users = userRepository.findByGalaxy(galaxy);
         for (User user : users) {
@@ -112,7 +113,7 @@ public class GalaxyService {
             userRepository.save(user);
         }
         galaxyRepository.delete(galaxy);
-        return GalaxyResponse.from(galaxy, "그룹이 성공적으로 삭제되었습니다.");
+        return MessageResponse.from("그룹이 성공적으로 삭제되었습니다.");
     }
 
     // 캐시 조회

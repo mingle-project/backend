@@ -1,11 +1,15 @@
 package com.oreo.mingle.domain.galaxy.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.oreo.mingle.domain.galaxy.entity.enums.Age;
 import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
 import com.oreo.mingle.domain.galaxy.entity.enums.Relationship;
+import com.oreo.mingle.domain.qna.entity.Question;
 import com.oreo.mingle.global.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -37,6 +41,10 @@ public class Galaxy extends BaseTime {
 
     @Builder.Default
     private int cash = 100;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "galaxy", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions;
 
     public void updateName(String name) {
         this.name = name;

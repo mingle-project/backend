@@ -3,6 +3,7 @@ package com.oreo.mingle.domain.galaxy.controller;
 import com.oreo.mingle.domain.galaxy.dto.*;
 import com.oreo.mingle.domain.galaxy.service.GalaxyService;
 import com.oreo.mingle.domain.user.dto.CustomUserDetails;
+import com.oreo.mingle.global.dto.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -92,10 +93,10 @@ public class GalaxyController {
 
     // 그룹 삭제
     @DeleteMapping("/galaxy/me")
-    public ResponseEntity<GalaxyResponse> deleteGalaxy(Authentication authentication) {
+    public ResponseEntity<MessageResponse> deleteGalaxy(Authentication authentication) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("request to DELETE galaxy");
-        GalaxyResponse response = galaxyService.deleteGalaxy(userId);
+        MessageResponse response = galaxyService.deleteGalaxy(userId);
         return ResponseEntity.ok(response);
     }
 }
