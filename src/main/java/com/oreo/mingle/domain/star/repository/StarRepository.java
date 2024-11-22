@@ -10,3 +10,4 @@ public interface StarRepository extends JpaRepository<Star, Long> {
     @Query(value = "SELECT * FROM star ORDER BY RAND() LIMIT 1", nativeQuery = true)
     Optional<Star> findRandomStar();
 }
+

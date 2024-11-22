@@ -26,10 +26,8 @@ public class PetStar {
     @JoinColumn(name = "galaxy_id", nullable = false)
     private Galaxy galaxy;
 
-    @Column
     private int level;
 
-    @Column
     private int point;
 
     public void changeStar(Star newStar) {
@@ -39,6 +37,10 @@ public class PetStar {
     public void resetLevelAndPoints() {
         this.level = 1;
         this.point = 0;
+    }
+
+    public void changePoint(int point){
+        this.point = point;
     }
 
 }
