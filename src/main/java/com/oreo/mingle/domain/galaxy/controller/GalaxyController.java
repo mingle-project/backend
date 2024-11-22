@@ -54,7 +54,7 @@ public class GalaxyController {
 
     // 그룹 옵션 수정
     @PutMapping("/galaxy/{galaxy_id}/options")
-    public ResponseEntity<GalaxyResponse> updateGalaxyOptions(@PathVariable Long galaxyId,
+    public ResponseEntity<GalaxyResponse> updateGalaxyOptions(@PathVariable("galaxy_id") Long galaxyId,
                                                               @RequestBody UpdateGalaxyOptionsRequest request) {
         log.info("request to PUT update galaxy options with id: {}", galaxyId);
         GalaxyResponse response = galaxyService.updateGalaxyOptions(galaxyId, request);
