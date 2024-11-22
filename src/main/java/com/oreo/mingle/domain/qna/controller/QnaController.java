@@ -35,38 +35,17 @@ public class QnaController {
 
     // 질문 답변 작성
     @PostMapping("/questions/{questionId}/answers")
-    public ResponseEntity<AnswerResponse> submitAnswer(
-            @PathVariable("questionId") Long questionId,
-            @RequestParam("userId") Long userId,
-            @RequestBody AnswerRequest request) {
+    public ResponseEntity<AnswerResponse> submitAnswer(Authentication authentication, @PathVariable("question_id") Long questionId, @RequestBody AnswerRequest request) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("Request to POST answer: questionId={}, userId={}, content={}", questionId, userId, request.getContent());
-
         try {
-            // QnaService 호출
             AnswerResponse response = qnaService.submitAnswer(userId, questionId, request.getContent());
-
-            // 성공 로그
-            log.info("Answer submitted successfully: questionId={}, userId={}, answerId={}",
-                    questionId, userId, response.getAnswerId());
-
-            // HTTP 201 응답 반환
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
-            // 예외 로그
             log.error("Error while submitting answer: questionId={}, userId={}, error={}", questionId, userId, e.getMessage());
-
-            // HTTP 400 응답 반환
             return ResponseEntity.badRequest().body(null);
         }
     }
-//    @PostMapping("/questions/{questionId}/answers")
-//    public ResponseEntity<AnswerResponse> submitAnswer(@PathVariable("questionId") Long questionId,
-//            @RequestParam("userId") Long userId,
-//            @RequestBody String content) {
-//        log.info("Request to POST galaxy answer : questionId={}, userId={}, content={}", questionId, userId, content);
-//        AnswerResponse response = qnaService.submitAnswer(userId, questionId, content);
-//        return ResponseEntity.ok(response);
-//    }
 
     // 질문 목록 조회
     @GetMapping("/galaxy/questions")
@@ -79,9 +58,10 @@ public class QnaController {
 
     // 질문에 대한 답변 조회
     @GetMapping("/questions/{question_id}/answers")
-    public ResponseEntity<AnswerListResponse> getAnswerList(@PathVariable("question_id")Long questionId) {
+    public ResponseEntity<AnswerListResponse> getAnswerList(Authentication authentication, @PathVariable("question_id")Long questionId) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("request to GET galaxy answerList with id : {} ", questionId);
-        AnswerListResponse response = qnaService.getAnswerListByUser(questionId);
+        AnswerListResponse response = qnaService.getAnswerListByUser(userId, questionId);
         return ResponseEntity.ok(response);
     }
 }
