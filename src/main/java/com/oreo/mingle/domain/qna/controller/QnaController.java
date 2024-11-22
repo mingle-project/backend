@@ -33,7 +33,6 @@ public class QnaController {
         }
     }
 
-
     // 질문 답변 작성
     @PostMapping("/questions/{questionId}/answers")
     public ResponseEntity<AnswerResponse> submitAnswer(
@@ -70,10 +69,11 @@ public class QnaController {
 //    }
 
     // 질문 목록 조회
-    @GetMapping("/galaxy/{galaxy_id}/questions")
-    public ResponseEntity<QuestionListResponse> getQuestionList(@PathVariable("galaxy_id")Long galaxyId) {
-        log.info("request to GET galaxy questionList with id: {}", galaxyId);
-        QuestionListResponse response = qnaService.getReceivedQuestionsByUser(galaxyId);
+    @GetMapping("/galaxy/questions")
+    public ResponseEntity<QuestionListResponse> getQuestionList(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to GET galaxy questionList");
+        QuestionListResponse response = qnaService.getReceivedQuestionsByUser(userId);
         return ResponseEntity.ok(response);
     }
 

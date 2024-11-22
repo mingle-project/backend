@@ -17,6 +17,7 @@ import com.oreo.mingle.domain.star.service.StarService;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
 import com.oreo.mingle.domain.user.service.UserService;
+import com.oreo.mingle.global.service.GlobalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,18 +38,8 @@ public class QnaService {
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
     private final UserRepository userRepository;
-    
-    private final StarService starService;
-    private final UserService userService;
-    private final GalaxyService galaxyService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-    private Map<String, List<String>> questionsMap;
-    public void QuestionService() throws IOException {
-        InputStream inputStream = getClass().getResourceAsStream("/static/qnas.json");
-        this.questionsMap = objectMapper.readValue(inputStream, new TypeReference<>() {});
-    }
+    private final GlobalService globalService;
 
     // 1. groupId와 date를 사용해 당일 질문 조회
     public Question getQuestionByGroupAndDate(Long questionId) {
@@ -59,29 +50,9 @@ public class QnaService {
     }
 
     public QuestionResponse findTodayQuestion(Long userId) {
-        Galaxy galaxy = galaxyService.findGalaxyByUserId(userId);
-        Question question = getOrCreateQuestion(galaxy);
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        Question question = globalService.getOrCreateQuestion(galaxy);
         return QuestionResponse.from(question);
-    }
-
-    public Question getOrCreateQuestion(Galaxy galaxy) {
-        LocalDate today = LocalDate.now();
-        Optional<Question> existingQuestion = questionRepository.findByGalaxyAndDate(galaxy, today);
-        if (existingQuestion.isPresent()) {
-            return existingQuestion.get();
-        }
-        QuestionType type = determineQuestionType(galaxy);
-        long questionCount = questionRepository.countByGalaxy(galaxy);
-        List<String> typeQuestions = questionsMap.get(type.name());
-        int questionIndex = (int) (questionCount % typeQuestions.size());
-        String selectedQuestion = typeQuestions.get(questionIndex+1);
-        Question newQuestion = Question.builder()
-                .galaxy(galaxy)
-                .type(type)
-                .subject(selectedQuestion)
-                .date(today)
-                .build();
-        return questionRepository.save(newQuestion);
     }
 
     // 2. 질문 답변 작성
@@ -107,7 +78,7 @@ public class QnaService {
         answerRepository.save(newAnswer);
 
         if (checkAllAnswered(newAnswer.getQuestion())) {
-            starService.savingPoint(question.getGalaxy().getId());
+            globalService.savingPoint(question.getGalaxy().getId());
         }
 
         //return 값
@@ -121,23 +92,20 @@ public class QnaService {
         int answerCount = answerRepository.countByQuestion(question);
         return usersCount == answerCount;
     }
-    // 4. 현재까지 받은 질문 목록 조회
-    public QuestionListResponse getReceivedQuestionsByUser(Long galaxyId) {
-        List<Question> questions = questionRepository.findByGalaxyId(galaxyId);
 
-        // 질문이 존재하지 않을 경우 예외 처리
+    // 4. 현재까지 받은 질문 목록 조회
+    public QuestionListResponse getReceivedQuestionsByUser(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        List<Question> questions = questionRepository.findByGalaxy(galaxy);
         if (questions.isEmpty()) {
             throw new IllegalArgumentException("은하가 받은 질문이 없습니다.");
         }
-        // Question -> QuestionResponse 변환
         List<QuestionResponse> questionResponses = questions.stream()
-                .map(QuestionResponse::from) // QuestionResponse의 from 메서드 활용
+                .map(QuestionResponse::from)
                 .collect(Collectors.toList());
-
         return QuestionListResponse.builder()
-                .questions(questionResponses) // 변환된 DTO 리스트를 사용
+                .questions(questionResponses)
                 .build();
-
     }
 
     // 5. 현재까지 답한 질문들의 답변 조회
@@ -166,45 +134,6 @@ public class QnaService {
                 .date(question.getDate())
                 .answer(answerResponses)
                 .build();
-    }
-
-    public QuestionType determineQuestionType(Galaxy galaxy) {
-        Gender gender = galaxy.getGender();
-        Age age = galaxy.getAge();
-        Relationship relationship = galaxy.getRelationship();
-        // 동성 그룹
-        if (gender == Gender.MALE || gender == Gender.FEMALE) {
-            if (age == Age.AGE_10) { // 미성년자
-                return switch (relationship) {
-                    case ACQUAINTANCE -> QuestionType.A;
-                    case CLOSE -> QuestionType.B;
-                    case COMFORTABLE -> QuestionType.C;
-                };
-            } else { // 성인
-                return switch (relationship) {
-                    case ACQUAINTANCE -> QuestionType.D;
-                    case CLOSE -> QuestionType.E;
-                    case COMFORTABLE -> QuestionType.F;
-                };
-            }
-        }
-        // 혼성 그룹
-        else if (gender == Gender.MIXED) {
-            if (age == Age.AGE_10) { // 미성년자
-                return switch (relationship) {
-                    case ACQUAINTANCE -> QuestionType.G;
-                    case CLOSE -> QuestionType.H;
-                    case COMFORTABLE -> QuestionType.I;
-                };
-            } else { // 성인
-                return switch (relationship) {
-                    case ACQUAINTANCE -> QuestionType.J;
-                    case CLOSE -> QuestionType.K;
-                    case COMFORTABLE -> QuestionType.L;
-                };
-            }
-        }
-        throw new IllegalArgumentException("유효하지 않은 그룹 옵션");
     }
 
     private Question findQuestionByQuestionId(Long question) {

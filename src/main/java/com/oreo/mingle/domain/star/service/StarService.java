@@ -1,7 +1,6 @@
 package com.oreo.mingle.domain.star.service;
 
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
-import com.oreo.mingle.domain.galaxy.service.GalaxyService;
 import com.oreo.mingle.domain.star.dto.response.CollectionStarResponse;
 import com.oreo.mingle.domain.star.dto.response.PetStarResponse;
 import com.oreo.mingle.domain.star.entity.CollectionStar;
@@ -10,6 +9,7 @@ import com.oreo.mingle.domain.star.entity.Star;
 import com.oreo.mingle.domain.star.repository.CollectionStarRepository;
 import com.oreo.mingle.domain.star.repository.PetStarRepository;
 import com.oreo.mingle.domain.star.repository.StarRepository;
+import com.oreo.mingle.global.service.GlobalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class StarService {
     private final CollectionStarRepository collectionStarRepository;
     private final PetStarRepository petStarRepository;
 
-    private final GalaxyService galaxyService;
+    private final GlobalService globalService;
 
     //메인별 선택하기
     @Transactional
@@ -105,7 +105,7 @@ public class StarService {
     //육성별 조회하기
     @Transactional(readOnly = true)
     public PetStarResponse getPetStar(Long galaxyId) {
-        Galaxy galaxy = galaxyService.findGalaxyById(galaxyId);
+        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
         PetStar petStar = petStarRepository.findByGalaxy(galaxy)
                 .orElseThrow(() -> new IllegalArgumentException("해당 우주에는 해당하는 육성별이 존재하지 않습니다."));
 
@@ -125,7 +125,7 @@ public class StarService {
     //새로운 별 육성하기
     @Transactional
     public PetStarResponse createNewPetStar(Long galaxyId) {
-        Galaxy galaxy = galaxyService.findGalaxyById(galaxyId);
+        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
 
         // Galaxy에 해당하는 육성별(PetStar) 찾기
         PetStar petStar = petStarRepository.findByGalaxy(galaxy).orElse(null);
@@ -185,24 +185,5 @@ public class StarService {
                     updatedPetStar.getPoint()
             );
         }
-    }
-
-    //모두 답변하면 포인트 1 증가
-    public void savingPoint(Long galaxyId){
-        Galaxy galaxy = galaxyService.findGalaxyById(galaxyId);
-        // PetStar 조회
-        Optional<PetStar> petStarOptional = petStarRepository.findByGalaxy(galaxy);
-
-        // PetStar가 존재하지 않으면 예외를 던짐
-        PetStar petStar = petStarOptional.orElseThrow(() ->
-                new IllegalArgumentException("해당 우주에 육성 별 조회를 실패했습니다.")
-        );
-
-        // 포인트 증가 로직
-        int currentPoint = petStar.getPoint();
-        petStar.changePoint(currentPoint + 1);
-
-        // 변경된 PetStar를 저장
-        petStarRepository.save(petStar);
     }
 }
