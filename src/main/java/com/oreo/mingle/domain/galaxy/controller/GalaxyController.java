@@ -34,6 +34,15 @@ public class GalaxyController {
         return ResponseEntity.ok(response);
     }
 
+    // 질문 시작하기
+    @PutMapping("/api/galaxy/me/start-question")
+    public ResponseEntity<GalaxyResponse> putGalaxyIsStarted(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to GET start question");
+        GalaxyResponse response = galaxyService.updateQuestionStarted(userId);
+        return ResponseEntity.ok(response);
+    }
+
     // 그룹 프로필 조회
     @GetMapping("/galaxy/me/profile")
     public ResponseEntity<GalaxyProfileResponse> getGalaxyProfile(Authentication authentication) {
@@ -54,7 +63,7 @@ public class GalaxyController {
 
     // 그룹 옵션 수정
     @PutMapping("/galaxy/{galaxy_id}/options")
-    public ResponseEntity<GalaxyResponse> updateGalaxyOptions(@PathVariable Long galaxyId,
+    public ResponseEntity<GalaxyResponse> updateGalaxyOptions(@PathVariable("galaxy_id") Long galaxyId,
                                                               @RequestBody UpdateGalaxyOptionsRequest request) {
         log.info("request to PUT update galaxy options with id: {}", galaxyId);
         GalaxyResponse response = galaxyService.updateGalaxyOptions(galaxyId, request);

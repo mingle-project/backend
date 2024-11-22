@@ -4,10 +4,12 @@ import com.oreo.mingle.domain.qna.dto.*;
 import com.oreo.mingle.domain.qna.entity.Question;
 import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.domain.qna.service.QnaService;
+import com.oreo.mingle.domain.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -18,18 +20,12 @@ public class QnaController {
     private final QnaService qnaService;
 
     //당일 질문 조회 api
-    @GetMapping("/questions/{question_id}")
-    public ResponseEntity<QuestionResponse> getTodayQuestion(@PathVariable("question_id") Long questionId) {
-        log.info("Request to GET today's question with ID: {}", questionId);
-
+    @GetMapping("/questions/today")
+    public ResponseEntity<QuestionResponse> getTodayQuestion(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("Request to GET today's question");
         try {
-            // Service 호출
-            Question question = qnaService.getQuestionByGroupAndDate(questionId);
-
-            // Entity -> DTO 변환
-            QuestionResponse response = QuestionResponse.from(question);
-
-            // 성공 응답 반환
+            QuestionResponse response = qnaService.findTodayQuestion(userId);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             log.error("Error fetching today's question: {}", e.getMessage());

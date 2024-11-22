@@ -38,6 +38,7 @@ out/
 
 ### Project ###
 **/application.yaml
+**/qnas.json
 
 # macOS system files
 *.DS_Store

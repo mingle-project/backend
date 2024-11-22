@@ -1,6 +1,12 @@
 package com.oreo.mingle.domain.qna.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
+import com.oreo.mingle.domain.galaxy.entity.enums.Age;
+import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
+import com.oreo.mingle.domain.galaxy.entity.enums.Relationship;
+import com.oreo.mingle.domain.galaxy.service.GalaxyService;
 import com.oreo.mingle.domain.qna.dto.*;
 import com.oreo.mingle.domain.qna.entity.Answer;
 import com.oreo.mingle.domain.qna.entity.Question;
@@ -10,12 +16,17 @@ import com.oreo.mingle.domain.qna.repository.QuestionRepository;
 import com.oreo.mingle.domain.star.service.StarService;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
+import com.oreo.mingle.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,6 +39,16 @@ public class QnaService {
     private final UserRepository userRepository;
     
     private final StarService starService;
+    private final UserService userService;
+    private final GalaxyService galaxyService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+    private Map<String, List<String>> questionsMap;
+    public void QuestionService() throws IOException {
+        InputStream inputStream = getClass().getResourceAsStream("/static/qnas.json");
+        this.questionsMap = objectMapper.readValue(inputStream, new TypeReference<>() {});
+    }
 
     // 1. groupId와 date를 사용해 당일 질문 조회
     public Question getQuestionByGroupAndDate(Long questionId) {
@@ -35,6 +56,32 @@ public class QnaService {
         Question question = findQuestionByQuestionId(questionId);
         return questionRepository.findByGalaxyAndDate(question.getGalaxy(), today)
                 .orElseThrow(() -> new IllegalArgumentException("해당 날짜에 질문이 존재하지 않습니다."));
+    }
+
+    public QuestionResponse findTodayQuestion(Long userId) {
+        Galaxy galaxy = galaxyService.findGalaxyByUserId(userId);
+        Question question = getOrCreateQuestion(galaxy);
+        return QuestionResponse.from(question);
+    }
+
+    public Question getOrCreateQuestion(Galaxy galaxy) {
+        LocalDate today = LocalDate.now();
+        Optional<Question> existingQuestion = questionRepository.findByGalaxyAndDate(galaxy, today);
+        if (existingQuestion.isPresent()) {
+            return existingQuestion.get();
+        }
+        QuestionType type = determineQuestionType(galaxy);
+        long questionCount = questionRepository.countByGalaxy(galaxy);
+        List<String> typeQuestions = questionsMap.get(type.name());
+        int questionIndex = (int) (questionCount % typeQuestions.size());
+        String selectedQuestion = typeQuestions.get(questionIndex+1);
+        Question newQuestion = Question.builder()
+                .galaxy(galaxy)
+                .type(type)
+                .subject(selectedQuestion)
+                .date(today)
+                .build();
+        return questionRepository.save(newQuestion);
     }
 
     // 2. 질문 답변 작성
@@ -119,6 +166,45 @@ public class QnaService {
                 .date(question.getDate())
                 .answer(answerResponses)
                 .build();
+    }
+
+    public QuestionType determineQuestionType(Galaxy galaxy) {
+        Gender gender = galaxy.getGender();
+        Age age = galaxy.getAge();
+        Relationship relationship = galaxy.getRelationship();
+        // 동성 그룹
+        if (gender == Gender.MALE || gender == Gender.FEMALE) {
+            if (age == Age.AGE_10) { // 미성년자
+                return switch (relationship) {
+                    case ACQUAINTANCE -> QuestionType.A;
+                    case CLOSE -> QuestionType.B;
+                    case COMFORTABLE -> QuestionType.C;
+                };
+            } else { // 성인
+                return switch (relationship) {
+                    case ACQUAINTANCE -> QuestionType.D;
+                    case CLOSE -> QuestionType.E;
+                    case COMFORTABLE -> QuestionType.F;
+                };
+            }
+        }
+        // 혼성 그룹
+        else if (gender == Gender.MIXED) {
+            if (age == Age.AGE_10) { // 미성년자
+                return switch (relationship) {
+                    case ACQUAINTANCE -> QuestionType.G;
+                    case CLOSE -> QuestionType.H;
+                    case COMFORTABLE -> QuestionType.I;
+                };
+            } else { // 성인
+                return switch (relationship) {
+                    case ACQUAINTANCE -> QuestionType.J;
+                    case CLOSE -> QuestionType.K;
+                    case COMFORTABLE -> QuestionType.L;
+                };
+            }
+        }
+        throw new IllegalArgumentException("유효하지 않은 그룹 옵션");
     }
 
     private Question findQuestionByQuestionId(Long question) {

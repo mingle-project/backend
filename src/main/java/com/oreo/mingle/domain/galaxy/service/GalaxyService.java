@@ -52,6 +52,13 @@ public class GalaxyService {
         return GalaxyResponse.from(galaxy, "그룹에 성공적으로 참여하였습니다.");
     }
 
+    // 질문 시작하기
+    public GalaxyResponse updateQuestionStarted(Long userId) {
+        Galaxy galaxy = findGalaxyByUserId(userId);
+        galaxy.startQuestion();
+        return GalaxyResponse.from(galaxy, "질문이 성공적으로 시작되었습니다.");
+    }
+
     // 그룹 프로필 조회
     public GalaxyProfileResponse getMyGalaxyProfile(Long userId) {
         User user = userService.findUserByUserId(userId);
@@ -110,5 +117,10 @@ public class GalaxyService {
     public Galaxy findGalaxyById(Long galaxyId) {
         return galaxyRepository.findById(galaxyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 Galaxy를 찾을 수 없습니다."));
+    }
+
+    public Galaxy findGalaxyByUserId(Long userId) {
+        User user = userService.findUserByUserId(userId);
+        return user.getGalaxy();
     }
 }
