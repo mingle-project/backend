@@ -8,10 +8,12 @@ import com.oreo.mingle.domain.user.dto.UserResponse;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
 import com.oreo.mingle.domain.user.service.UserService;
+import com.oreo.mingle.global.dto.MessageResponse;
 import com.oreo.mingle.global.service.GlobalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +28,7 @@ public class GalaxyService {
     private final GlobalService globalService;
 
     // 그룹 생성
+    @Transactional
     public GalaxyResponse createGalaxy(Long userId, CreateGalaxyRequest request) {
         String code = generateGroupCode();
         Galaxy newGalaxy = Galaxy.builder()
@@ -45,6 +48,7 @@ public class GalaxyService {
     }
 
     // 그룹 참여
+    @Transactional
     public GalaxyResponse joinGalaxyByCode(Long userId, String code) {
         Galaxy galaxy = galaxyRepository.findByCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("해당 코드를 가진 Galaxy를 찾을 수 없습니다."));
@@ -55,6 +59,7 @@ public class GalaxyService {
     }
 
     // 질문 시작하기
+    @Transactional
     public GalaxyResponse updateQuestionStarted(Long userId) {
         Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         galaxy.startQuestion();
@@ -62,6 +67,7 @@ public class GalaxyService {
     }
 
     // 그룹 프로필 조회
+    @Transactional(readOnly = true)
     public GalaxyProfileResponse getMyGalaxyProfile(Long userId) {
         User user = globalService.findUserByUserId(userId);
         Galaxy galaxy = user.getGalaxy();
@@ -73,50 +79,51 @@ public class GalaxyService {
     }
 
     // 그룹명 수정
-    public GalaxyResponse updateGalaxyName(Long galaxyId, UpdateGalaxyNameRequest request) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
+    @Transactional
+    public GalaxyResponse updateGalaxyName(Long userId, UpdateGalaxyNameRequest request) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         galaxy.updateName(request.getName());
         galaxyRepository.save(galaxy);
         return GalaxyResponse.from(galaxy, "그룹명이 성공적으로 수정되었습니다.");
     }
 
     // 그룹 옵션 수정
-    public GalaxyResponse updateGalaxyOptions(Long galaxyId, UpdateGalaxyOptionsRequest request) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
+    @Transactional
+    public GalaxyResponse updateGalaxyOptions(Long userId, UpdateGalaxyOptionsRequest request) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         galaxy.updateOptions(request.getGender(), request.getAge(), request.getRelationship());
         galaxyRepository.save(galaxy);
         return GalaxyResponse.from(galaxy, "그룹 옵션이 성공적으로 수정되었습니다.");
     }
 
     // 그룹 코드 조회
-    public String getGalaxyCode(Long galaxyId) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
+    @Transactional(readOnly = true)
+    public String getGalaxyCode(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         return galaxy.getCode();
     }
 
     // 그룹 삭제
-    public GalaxyResponse deleteGalaxy(Long galaxyId) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
-
-        // Galaxy에 속한 모든 사용자 탈퇴 처리
+    @Transactional
+    public MessageResponse deleteGalaxy(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         List<User> users = userRepository.findByGalaxy(galaxy);
         for (User user : users) {
-            user.leaveGalaxy(); // 사용자의 Galaxy 관계를 null로 설정
-            userRepository.save(user); // 변경 사항 저장
+            user.leaveGalaxy();
+            userRepository.save(user);
         }
-
-        // Galaxy 삭제
         galaxyRepository.delete(galaxy);
-
-        return GalaxyResponse.from(galaxy, "그룹이 성공적으로 삭제되었습니다.");
+        return MessageResponse.from("그룹이 성공적으로 삭제되었습니다.");
     }
 
     // 캐시 조회
+    @Transactional(readOnly = true)
     public CashResponse getGalaxyCash(Long galaxyId) {
         Galaxy galaxy = globalService.findGalaxyById(galaxyId);
         return CashResponse.from(galaxy);
     }
 
+    @Transactional(readOnly = true)
     private String generateGroupCode() {
         String code = UUID.randomUUID().toString().substring(0, 8);
         if (galaxyRepository.findByCode(code).isPresent()) {

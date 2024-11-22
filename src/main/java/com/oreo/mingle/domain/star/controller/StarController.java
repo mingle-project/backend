@@ -33,6 +33,7 @@ public class StarController {
         }
     }
 
+    // 새로운 별 육성하기
     @GetMapping("/galaxy/{galaxy_id}/stars/pet/new")
     public ResponseEntity<?> createNewStar(@PathVariable("galaxy_id") Long galaxyId) {
         try {

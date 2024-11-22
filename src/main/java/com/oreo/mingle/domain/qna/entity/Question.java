@@ -1,5 +1,6 @@
 package com.oreo.mingle.domain.qna.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
 import com.oreo.mingle.global.entity.BaseTime;
@@ -7,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,4 +32,8 @@ public class Question extends BaseTime {
     private String subject;
 
     public LocalDate date;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Answer> answers;
 }

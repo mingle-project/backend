@@ -3,6 +3,7 @@ package com.oreo.mingle.domain.galaxy.controller;
 import com.oreo.mingle.domain.galaxy.dto.*;
 import com.oreo.mingle.domain.galaxy.service.GalaxyService;
 import com.oreo.mingle.domain.user.dto.CustomUserDetails;
+import com.oreo.mingle.global.dto.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -53,44 +54,49 @@ public class GalaxyController {
     }
 
     // 그룹명 수정
-    @PutMapping("/galaxy/{galaxy_id}/name")
-    public ResponseEntity<GalaxyResponse> updateGalaxyName(@PathVariable("galaxy_id") Long galaxyId,
+    @PutMapping("/galaxy/me/name")
+    public ResponseEntity<GalaxyResponse> updateGalaxyName(Authentication authentication,
                                                            @RequestBody UpdateGalaxyNameRequest request) {
-        log.info("request to PUT update galaxy name with id: {}", galaxyId);
-        GalaxyResponse response = galaxyService.updateGalaxyName(galaxyId, request);
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to PUT update galaxy name");
+        GalaxyResponse response = galaxyService.updateGalaxyName(userId, request);
         return ResponseEntity.ok(response);
     }
 
     // 그룹 옵션 수정
-    @PutMapping("/galaxy/{galaxy_id}/options")
-    public ResponseEntity<GalaxyResponse> updateGalaxyOptions(@PathVariable("galaxy_id") Long galaxyId,
+    @PutMapping("/galaxy/me/options")
+    public ResponseEntity<GalaxyResponse> updateGalaxyOptions(Authentication authentication,
                                                               @RequestBody UpdateGalaxyOptionsRequest request) {
-        log.info("request to PUT update galaxy options with id: {}", galaxyId);
-        GalaxyResponse response = galaxyService.updateGalaxyOptions(galaxyId, request);
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to PUT update galaxy options");
+        GalaxyResponse response = galaxyService.updateGalaxyOptions(userId, request);
         return ResponseEntity.ok(response);
     }
 
     // 그룹 코드 조회
-    @GetMapping("/galaxy/{galaxy_id}/code")
-    public ResponseEntity<String> getGalaxyCode(@PathVariable("galaxy_id") Long galaxyId) {
-        log.info("request to GET galaxy code with id: {}", galaxyId);
-        String code = galaxyService.getGalaxyCode(galaxyId);
+    @GetMapping("/galaxy/me/code")
+    public ResponseEntity<String> getGalaxyCode(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to GET galaxy code");
+        String code = galaxyService.getGalaxyCode(userId);
         return ResponseEntity.ok(code);
     }
 
     // 캐시 조회
-    @GetMapping("/galaxy/{galaxy_id}/cash")
-    public ResponseEntity<CashResponse> getGalaxyCash(@PathVariable("galaxy_id") Long galaxyId) {
-        log.info("request to GET galaxy cash with id: {}", galaxyId);
-        CashResponse response = galaxyService.getGalaxyCash(galaxyId);
+    @GetMapping("/galaxy/me/cash")
+    public ResponseEntity<CashResponse> getGalaxyCash(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to GET galaxy cash");
+        CashResponse response = galaxyService.getGalaxyCash(userId);
         return ResponseEntity.ok(response);
     }
 
     // 그룹 삭제
-    @DeleteMapping("/galaxy/{galaxy_id}")
-    public ResponseEntity<GalaxyResponse> deleteGalaxy(@PathVariable("galaxy_id") Long galaxyId) {
-        log.info("request to DELETE galaxy with id: {}", galaxyId);
-        GalaxyResponse response = galaxyService.deleteGalaxy(galaxyId);
+    @DeleteMapping("/galaxy/me")
+    public ResponseEntity<MessageResponse> deleteGalaxy(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("request to DELETE galaxy");
+        MessageResponse response = galaxyService.deleteGalaxy(userId);
         return ResponseEntity.ok(response);
     }
 }
