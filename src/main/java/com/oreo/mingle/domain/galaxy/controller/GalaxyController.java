@@ -36,7 +36,7 @@ public class GalaxyController {
     }
 
     // 질문 시작하기
-    @GetMapping("/api/galaxy/me/start-question")
+    @GetMapping("/galaxy/me/start-question")
     public ResponseEntity<GalaxyResponse> getGalaxyIsStarted(Authentication authentication) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         log.info("request to GET start question");

@@ -63,6 +63,7 @@ public class GalaxyService {
     public GalaxyResponse updateQuestionStarted(Long userId) {
         Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         galaxy.startQuestion();
+        galaxyRepository.save(galaxy);
         return GalaxyResponse.from(galaxy, "질문이 성공적으로 시작되었습니다.");
     }
 
