@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Optional<Question> findByGalaxyAndDate(Galaxy galaxy, LocalDate date);
 
-    List<Question> findByGalaxyId(Long galaxyId);
+    List<Question> findByGalaxy(Galaxy galaxy);
+
+    int countByGalaxy(Galaxy galaxy);
 }

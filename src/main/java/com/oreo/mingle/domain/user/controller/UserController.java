@@ -47,7 +47,7 @@ public class UserController {
     @GetMapping("/users/me/profile")
     public ResponseEntity<UserResponse> getProfile(Authentication authentication) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
-        log.info("request to PUT user nickname with id: {}", userId);
+        log.info("request to GET user profile: {}", userId);
         UserResponse response = userService.getProfile(userId);
         return ResponseEntity.ok(response);
     }

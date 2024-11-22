@@ -1,6 +1,12 @@
 package com.oreo.mingle.domain.qna.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
+import com.oreo.mingle.domain.galaxy.entity.enums.Age;
+import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
+import com.oreo.mingle.domain.galaxy.entity.enums.Relationship;
+import com.oreo.mingle.domain.galaxy.service.GalaxyService;
 import com.oreo.mingle.domain.qna.dto.*;
 import com.oreo.mingle.domain.qna.entity.Answer;
 import com.oreo.mingle.domain.qna.entity.Question;
@@ -10,12 +16,18 @@ import com.oreo.mingle.domain.qna.repository.QuestionRepository;
 import com.oreo.mingle.domain.star.service.StarService;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
+import com.oreo.mingle.domain.user.service.UserService;
+import com.oreo.mingle.global.service.GlobalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -26,8 +38,8 @@ public class QnaService {
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
     private final UserRepository userRepository;
-    
-    private final StarService starService;
+
+    private final GlobalService globalService;
 
     // 1. groupId와 date를 사용해 당일 질문 조회
     public Question getQuestionByGroupAndDate(Long questionId) {
@@ -35,6 +47,12 @@ public class QnaService {
         Question question = findQuestionByQuestionId(questionId);
         return questionRepository.findByGalaxyAndDate(question.getGalaxy(), today)
                 .orElseThrow(() -> new IllegalArgumentException("해당 날짜에 질문이 존재하지 않습니다."));
+    }
+
+    public QuestionResponse findTodayQuestion(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        Question question = globalService.getOrCreateQuestion(galaxy);
+        return QuestionResponse.from(question);
     }
 
     // 2. 질문 답변 작성
@@ -60,7 +78,7 @@ public class QnaService {
         answerRepository.save(newAnswer);
 
         if (checkAllAnswered(newAnswer.getQuestion())) {
-            starService.savingPoint(question.getGalaxy().getId());
+            globalService.savingPoint(question.getGalaxy().getId());
         }
 
         //return 값
@@ -74,23 +92,20 @@ public class QnaService {
         int answerCount = answerRepository.countByQuestion(question);
         return usersCount == answerCount;
     }
-    // 4. 현재까지 받은 질문 목록 조회
-    public QuestionListResponse getReceivedQuestionsByUser(Long galaxyId) {
-        List<Question> questions = questionRepository.findByGalaxyId(galaxyId);
 
-        // 질문이 존재하지 않을 경우 예외 처리
+    // 4. 현재까지 받은 질문 목록 조회
+    public QuestionListResponse getReceivedQuestionsByUser(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        List<Question> questions = questionRepository.findByGalaxy(galaxy);
         if (questions.isEmpty()) {
             throw new IllegalArgumentException("은하가 받은 질문이 없습니다.");
         }
-        // Question -> QuestionResponse 변환
         List<QuestionResponse> questionResponses = questions.stream()
-                .map(QuestionResponse::from) // QuestionResponse의 from 메서드 활용
+                .map(QuestionResponse::from)
                 .collect(Collectors.toList());
-
         return QuestionListResponse.builder()
-                .questions(questionResponses) // 변환된 DTO 리스트를 사용
+                .questions(questionResponses)
                 .build();
-
     }
 
     // 5. 현재까지 답한 질문들의 답변 조회

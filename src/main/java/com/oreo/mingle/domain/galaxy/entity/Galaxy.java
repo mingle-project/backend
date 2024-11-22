@@ -47,4 +47,8 @@ public class Galaxy extends BaseTime {
         this.age = age;
         this.relationship = relationship;
     }
+
+    public void startQuestion() {
+        this.isStarted = true;
+    }
 }

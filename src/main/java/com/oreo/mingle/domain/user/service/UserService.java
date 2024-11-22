@@ -7,6 +7,7 @@ import com.oreo.mingle.domain.user.dto.UserResponse;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.entity.enums.Role;
 import com.oreo.mingle.domain.user.repository.UserRepository;
+import com.oreo.mingle.global.service.GlobalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +20,8 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final GlobalService globalService;
 
     public UserResponse joinProcess(SignupRequest signupRequest) {
         if (userRepository.findByUsername(signupRequest.getUsername()).isPresent()) {
@@ -36,7 +39,7 @@ public class UserService {
     }
 
     public UserResponse updateUserNickname(Long userId, String nickname) {
-        User user = findUserByUserId(userId);
+        User user = globalService.findUserByUserId(userId);
         String beforeNickname = user.getNickname();
         user.updateNickname(nickname);
         userRepository.save(user);
@@ -45,19 +48,14 @@ public class UserService {
     }
 
     public UserResponse deleteUserFromGroup(Long userId) {
-        User user = findUserByUserId(userId);
+        User user = globalService.findUserByUserId(userId);
         user.leaveGalaxy();
         userRepository.save(user);
         return UserResponse.from(user, "그룹에서 탈퇴했습니다.");
     }
-
-    public User findUserByUserId(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 User를 찾을 수 없습니다."));
-    }
     
     public UserResponse getProfile(Long userId) {
-        User user = findUserByUserId(userId);
+        User user = globalService.findUserByUserId(userId);
         return UserResponse.from(user,"사용자 조회 성공");
     }
 }

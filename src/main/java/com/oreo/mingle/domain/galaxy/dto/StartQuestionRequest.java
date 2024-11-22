@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class JoinGalaxyRequest {
-    private String groupCode;
+public class StartQuestionRequest {
+    private Boolean isStarted;
 }
