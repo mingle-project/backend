@@ -88,8 +88,19 @@ public class GalaxyService {
 
     // 그룹 삭제
     public GalaxyResponse deleteGalaxy(Long galaxyId) {
+        // Galaxy 조회
         Galaxy galaxy = findGalaxyById(galaxyId);
+
+        // Galaxy에 속한 모든 사용자 탈퇴 처리
+        List<User> users = userRepository.findByGalaxy(galaxy);
+        for (User user : users) {
+            user.leaveGalaxy(); // 사용자의 Galaxy 관계를 null로 설정
+            userRepository.save(user); // 변경 사항 저장
+        }
+
+        // Galaxy 삭제
         galaxyRepository.delete(galaxy);
+
         return GalaxyResponse.from(galaxy, "그룹이 성공적으로 삭제되었습니다.");
     }
 
