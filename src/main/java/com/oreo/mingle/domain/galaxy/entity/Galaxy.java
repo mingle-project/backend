@@ -43,6 +43,10 @@ public class Galaxy extends BaseTime {
     @Builder.Default
     private int cash = 100;
 
+    public void changeCash(int cash) {
+        this.cash = cash;
+    }
+
     @JsonIgnore
     @OneToMany(mappedBy = "galaxy", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
