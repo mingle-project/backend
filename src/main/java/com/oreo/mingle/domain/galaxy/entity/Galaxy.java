@@ -5,6 +5,7 @@ import com.oreo.mingle.domain.galaxy.entity.enums.Age;
 import com.oreo.mingle.domain.galaxy.entity.enums.Gender;
 import com.oreo.mingle.domain.galaxy.entity.enums.Relationship;
 import com.oreo.mingle.domain.qna.entity.Question;
+import com.oreo.mingle.domain.star.entity.PetStar;
 import com.oreo.mingle.global.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +46,10 @@ public class Galaxy extends BaseTime {
     @JsonIgnore
     @OneToMany(mappedBy = "galaxy", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "galaxy", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private PetStar petStar;
 
     public void updateName(String name) {
         this.name = name;

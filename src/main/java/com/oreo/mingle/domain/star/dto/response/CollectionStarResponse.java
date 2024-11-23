@@ -11,7 +11,6 @@ public record CollectionStarResponse(
         Long starId,
         String name,
 
-        String color,
         String image,
         Rarity Rarity,
 
