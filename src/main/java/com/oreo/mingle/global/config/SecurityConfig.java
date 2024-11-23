@@ -68,7 +68,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsFilter(){
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("http://127.0.0.1:3000", "http://localhost:3000"));
+        config.setAllowedOriginPatterns(List.of("http://127.0.0.1:3000", "http://localhost:3000", "https://mingle-mu.vercel.app/"));
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.addExposedHeader("Authorization");
