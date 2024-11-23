@@ -3,6 +3,7 @@ package com.oreo.mingle.domain.star.entity;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.oreo.mingle.domain.galaxy.entity.Galaxy;
+import com.oreo.mingle.domain.star.entity.enums.Level;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,25 +24,19 @@ public class PetStar {
     private Star star;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "galaxy_id", nullable = false)
+    @JoinColumn(name = "galaxy_id")
     private Galaxy galaxy;
 
-    public int getGalaxyCash() {
-        return galaxy != null ? galaxy.getCash() : 0; // Galaxy가 null일 경우 기본값 처리
-    }
-
-    private int level;
+    private Level level;
 
     private int point;
-
-
 
     public void changeStar(Star newStar) {
         this.star = newStar;
     }
 
     public void resetLevelAndPoints() {
-        this.level = 1;
+        this.level = Level.MUNZI;
         this.point = 0;
     }
 

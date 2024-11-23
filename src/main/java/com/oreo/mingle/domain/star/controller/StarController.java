@@ -6,10 +6,12 @@ import com.oreo.mingle.domain.star.dto.response.MessageResponse;
 import com.oreo.mingle.domain.star.dto.response.PetStarResponse;
 import com.oreo.mingle.domain.star.entity.PetStar;
 import com.oreo.mingle.domain.star.service.StarService;
+import com.oreo.mingle.domain.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +23,11 @@ import java.util.List;
 public class StarController {
     private final StarService starService;
   
-    @GetMapping("/galaxy/{galaxy_id}/stars/pet")
-    public ResponseEntity<?> getGrowingPetStar(@PathVariable("galaxy_id") Long galaxyId) {
+    @GetMapping("/galaxy/me/stars/pet")
+    public ResponseEntity<MessageResponse<PetStarResponse>> getGrowingPetStar(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         try {
-            PetStarResponse petStarResponse = starService.getPetStar(galaxyId);
+            PetStarResponse petStarResponse = starService.getPetStar(userId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("육성별 조회를 성공했습니다.", petStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -34,10 +37,11 @@ public class StarController {
     }
 
     // 새로운 별 육성하기
-    @GetMapping("/galaxy/{galaxy_id}/stars/pet/new")
-    public ResponseEntity<?> createNewStar(@PathVariable("galaxy_id") Long galaxyId) {
+    @GetMapping("/galaxy/me/stars/pet/new")
+    public ResponseEntity<?> createNewStar(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         try {
-            PetStarResponse petStarResponse = starService.createNewPetStar(galaxyId);
+            PetStarResponse petStarResponse = starService.createNewPetStar(userId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("새로운 육성 별을 생성했습니다!", petStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -47,10 +51,11 @@ public class StarController {
     }
 
 
-    @GetMapping("/galaxy/{galaxy_id}/stars")
-    public ResponseEntity<?> getStars(@PathVariable("galaxy_id") Long galaxyId){
+    @GetMapping("/galaxy/me/stars")
+    public ResponseEntity<?> getStars(Authentication authentication){
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         try {
-            List<CollectionStarResponse> collectionStars = starService.getStars(galaxyId);
+            List<CollectionStarResponse> collectionStars = starService.getStars(userId);
             MessageResponse<List<CollectionStarResponse>> response = new MessageResponse<>("도감의 모든 별을 불러왔습니다!", collectionStars);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -59,10 +64,12 @@ public class StarController {
         }
     }
 
-    @PutMapping("/galaxy/{galaxy_id}/stars/choice")
-    public ResponseEntity<?> updateMainStar(@PathVariable("galaxy_id") Long galaxyId, @RequestBody MainStarChooseRequest request) {
+    // 메인 별 선택
+    @PutMapping("/galaxy/me/stars/choice")
+    public ResponseEntity<?> updateMainStar(Authentication authentication, @RequestBody MainStarChooseRequest request) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         try {
-            CollectionStarResponse collectionStarResponse = starService.updateMainStar(galaxyId, request.starId());
+            CollectionStarResponse collectionStarResponse = starService.updateMainStar(userId, request.collectionStarId());
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("새로운 메인 별을 설정했습니다.", collectionStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -71,10 +78,11 @@ public class StarController {
         }
     }
 
-    @GetMapping("/galaxy/{galaxy_id}/stars/main")
-    public ResponseEntity<?> getMainCollectionStar(@PathVariable("galaxy_id") Long galaxyId) {
+    @GetMapping("/galaxy/me/stars/main")
+    public ResponseEntity<?> getMainCollectionStar(Authentication authentication) {
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         try {
-            CollectionStarResponse collectionStarResponse = starService.getMainStar(galaxyId);
+            CollectionStarResponse collectionStarResponse = starService.getMainStar(userId);
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("메인 별 불러오기 성공했습니다!", collectionStarResponse);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {

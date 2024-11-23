@@ -1,10 +1,13 @@
 package com.oreo.mingle.domain.star.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.oreo.mingle.domain.star.entity.enums.Rarity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,10 +23,18 @@ public class Star {
 
     private String name;
 
-    private String image;
+    private String bigstarImage;
 
-    private String color;
+    private String adultImage;
 
     @Enumerated(EnumType.STRING)
     private Rarity rarity;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "star", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PetStar> petStar;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "star", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CollectionStar> collectionStar;
 }
