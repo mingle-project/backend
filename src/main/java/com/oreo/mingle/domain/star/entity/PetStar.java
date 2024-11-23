@@ -44,4 +44,7 @@ public class PetStar {
         this.point = point;
     }
 
+    public void setLevel(Level level) {
+        this.level = level;
+    }
 }

@@ -11,6 +11,7 @@ import com.oreo.mingle.domain.qna.entity.Question;
 import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.domain.qna.repository.QuestionRepository;
 import com.oreo.mingle.domain.star.entity.PetStar;
+import com.oreo.mingle.domain.star.entity.enums.Level;
 import com.oreo.mingle.domain.star.repository.PetStarRepository;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
@@ -84,7 +85,6 @@ public class GlobalService {
         // 그룹 조회 및 육성 별 조회
         Galaxy galaxy = findGalaxyById(galaxyId);
 
-
         int currentCash = galaxy.getCash();
         galaxy.changeCash(currentCash + 10);
         galaxyRepository.save(galaxy);
@@ -156,5 +156,42 @@ public class GlobalService {
     public Galaxy findGalaxyById(Long galaxyId) {
         return galaxyRepository.findById(galaxyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 Galaxy를 찾을 수 없습니다."));
+    }
+
+    public void evolvePetStar(Long galaxyId) {
+        Galaxy galaxy = findGalaxyById(galaxyId);
+        // PetStar 조회
+        Optional<PetStar> petStarOptional = petStarRepository.findByGalaxy(galaxy);
+
+        // PetStar가 존재하지 않으면 예외를 던짐
+        PetStar petStar = petStarOptional.orElseThrow(() ->
+                new IllegalArgumentException("해당 우주에 육성 별 조회를 실패했습니다.")
+        );
+
+        // 현재 Level 확인
+        Level currentLevel = petStar.getLevel();
+        Level nextLevel = null;
+
+        // 진화 단계 결정
+        switch (currentLevel) {
+            case MUNZI:
+                nextLevel = Level.LITTLESTAR;
+                break;
+            case LITTLESTAR:
+                nextLevel = Level.BIGSTAR;
+                break;
+            case BIGSTAR:
+                nextLevel = Level.ADULT;
+                break;
+            case ADULT:
+                // 성체 단계에서는 더 이상 진화하지 않음
+                return;
+        }
+
+        // Level 업데이트 및 저장
+        if (nextLevel != null) {
+            petStar.setLevel(nextLevel);
+            petStarRepository.save(petStar); // PetStar 변경 사항 저장
+        }
     }
 }

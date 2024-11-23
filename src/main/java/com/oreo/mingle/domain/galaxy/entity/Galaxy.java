@@ -43,8 +43,8 @@ public class Galaxy extends BaseTime {
     @Builder.Default
     private int cash = 100;
 
-    public void changeCash(int cash) {
-        this.cash = cash;
+    public void changeCash(int newcash) {
+        this.cash = newcash;
     }
 
     @JsonIgnore
