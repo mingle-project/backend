@@ -26,6 +26,7 @@ public class StarController {
     @GetMapping("/galaxy/me/stars/pet")
     public ResponseEntity<MessageResponse<PetStarResponse>> getGrowingPetStar(Authentication authentication) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("육성 별 조회");
         try {
             PetStarResponse petStarResponse = starService.getPetStar(userId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("육성별 조회를 성공했습니다.", petStarResponse);
@@ -40,6 +41,7 @@ public class StarController {
     @GetMapping("/galaxy/me/stars/pet/new")
     public ResponseEntity<?> createNewStar(Authentication authentication) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("새로운 별 육성하기");
         try {
             PetStarResponse petStarResponse = starService.createNewPetStar(userId);
             MessageResponse<PetStarResponse> response = new MessageResponse<>("새로운 육성 별을 생성했습니다!", petStarResponse);
@@ -54,6 +56,7 @@ public class StarController {
     @GetMapping("/galaxy/me/stars")
     public ResponseEntity<?> getStars(Authentication authentication){
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("모은 별 조회");
         try {
             List<CollectionStarResponse> collectionStars = starService.getStars(userId);
             MessageResponse<List<CollectionStarResponse>> response = new MessageResponse<>("도감의 모든 별을 불러왔습니다!", collectionStars);
@@ -68,6 +71,7 @@ public class StarController {
     @PutMapping("/galaxy/me/stars/choice")
     public ResponseEntity<?> updateMainStar(Authentication authentication, @RequestBody MainStarChooseRequest request) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("대표별 선택하기");
         try {
             CollectionStarResponse collectionStarResponse = starService.updateMainStar(userId, request.collectionStarId());
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("새로운 메인 별을 설정했습니다.", collectionStarResponse);
@@ -81,6 +85,7 @@ public class StarController {
     @GetMapping("/galaxy/me/stars/main")
     public ResponseEntity<?> getMainCollectionStar(Authentication authentication) {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
+        log.info("대표별 조회하기");
         try {
             CollectionStarResponse collectionStarResponse = starService.getMainStar(userId);
             MessageResponse<CollectionStarResponse> response = new MessageResponse<>("메인 별 불러오기 성공했습니다!", collectionStarResponse);

@@ -124,7 +124,6 @@ public class GalaxyService {
         return CashResponse.from(galaxy);
     }
 
-    @Transactional(readOnly = true)
     private String generateGroupCode() {
         String code = UUID.randomUUID().toString().substring(0, 8);
         if (galaxyRepository.findByCode(code).isPresent()) {
