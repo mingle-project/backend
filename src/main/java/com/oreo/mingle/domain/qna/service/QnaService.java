@@ -67,12 +67,12 @@ public class QnaService {
         answerRepository.save(newAnswer);
         if (checkAllAnswered(newAnswer.getQuestion())) {
             globalService.savingPoint(question.getGalaxy().getId());
+            globalService.savingCash(question.getGalaxy().getId());
         }
         return AnswerResponse.from(newAnswer);
     }
 
     //3 모든 답변이 완료됐는지 확인
-    @Transactional(readOnly = true)
     private boolean checkAllAnswered(Question question) {
         Galaxy galaxy = question.getGalaxy();
         int usersCount = userRepository.countByGalaxy(galaxy);
@@ -124,7 +124,7 @@ public class QnaService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
+
     private Question findQuestionByQuestionId(Long question) {
         return questionRepository.findById(question)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID를 가진 Question을 찾을 수 없습니다."));

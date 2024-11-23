@@ -26,9 +26,15 @@ public class PetStar {
     @JoinColumn(name = "galaxy_id", nullable = false)
     private Galaxy galaxy;
 
+    public int getGalaxyCash() {
+        return galaxy != null ? galaxy.getCash() : 0; // Galaxy가 null일 경우 기본값 처리
+    }
+
     private int level;
 
     private int point;
+
+
 
     public void changeStar(Star newStar) {
         this.star = newStar;

@@ -79,6 +79,18 @@ public class GlobalService {
         petStarRepository.save(petStar);
     }
 
+    // 모두 답변하면 10캐시 추가
+    public void savingCash(Long galaxyId) {
+        // 그룹 조회 및 육성 별 조회
+        Galaxy galaxy = findGalaxyById(galaxyId);
+
+
+        int currentCash = galaxy.getCash();
+        galaxy.changeCash(currentCash + 10);
+        galaxyRepository.save(galaxy);
+
+    }
+
     public Question getOrCreateQuestion(Galaxy galaxy) {
         if (this.questionsMap == null) {
             throw new IllegalStateException("questionsMap이 초기화되지 않았습니다.");
