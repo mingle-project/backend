@@ -48,7 +48,7 @@ public class QnaService {
     private final GlobalService globalService;
 
     // 1. groupId와 date를 사용해 당일 질문 조회
-    @Transactional(readOnly = true)
+    @Transactional
     public QuestionResponse findTodayQuestion(Long userId) {
         Galaxy galaxy = globalService.findGalaxyByUserId(userId);
         if (!galaxy.getIsStarted()) {
@@ -80,8 +80,6 @@ public class QnaService {
         return AnswerResponse.from(newAnswer);
     }
 
-
-
     //3 모든 답변이 완료됐는지 확인
     private boolean checkAllAnswered(Question question) {
         Galaxy galaxy = question.getGalaxy();
@@ -89,8 +87,6 @@ public class QnaService {
         int answerCount = answerRepository.countByQuestion(question);
         return usersCount == answerCount;
     }
-
-
 
     // 4. 현재까지 받은 질문 목록 조회
     @Transactional(readOnly = true)
