@@ -6,12 +6,14 @@ import com.oreo.mingle.domain.star.dto.response.PetStarResponse;
 import com.oreo.mingle.domain.star.entity.CollectionStar;
 import com.oreo.mingle.domain.star.entity.PetStar;
 import com.oreo.mingle.domain.star.entity.Star;
+import com.oreo.mingle.domain.star.entity.enums.Level;
 import com.oreo.mingle.domain.star.repository.CollectionStarRepository;
 import com.oreo.mingle.domain.star.repository.PetStarRepository;
 import com.oreo.mingle.domain.star.repository.StarRepository;
 import com.oreo.mingle.global.service.GlobalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,93 +31,77 @@ public class StarService {
 
     private final GlobalService globalService;
 
+    @Value("${mingle.image-url.munzi}")
+    private String munziImage;
+
+    @Value("${mingle.image-url.littlestar}")
+    private String littlsstarImage;
+
     //메인별 선택하기
     @Transactional
-    public CollectionStarResponse updateMainStar(Long galaxyId, Long starId) {
-        // 기존의 메인별이 있으면 is_main을 false로 변경
-        collectionStarRepository.findByIsMainTrueAndGalaxyId(galaxyId).ifPresent(existingMainStar -> {
-            existingMainStar.unsetAsMain();
-            collectionStarRepository.save(existingMainStar);
-        });
-
-        // 새로운 main으로 설정할 별 찾기
-        CollectionStar collectionStar = collectionStarRepository.findByGalaxyIdAndStarId(galaxyId, starId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 galaxyId와 starId에 해당하는 CollectionStar가 없습니다."));
-
-        // 새로운 main 설정
-        collectionStar.setAsMain();
-        CollectionStar mainstar = collectionStarRepository.save(collectionStar);
-        return new CollectionStarResponse(
-                mainstar.getId(),
-                mainstar.getGalaxy().getId(),
-                mainstar.getStar().getId(),
-                mainstar.getStar().getName(),
-                mainstar.getStar().getColor(),
-                mainstar.getStar().getImage(),
-                mainstar.getStar().getRarity(),
-                mainstar.isMain()
-        );
+    public CollectionStarResponse updateMainStar(Long userId, Long collectionStarId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        collectionStarRepository.findByIsMainTrueAndGalaxy(galaxy).ifPresent(this::unsetMainStar);
+        CollectionStar collectionStar = collectionStarRepository.findById(collectionStarId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 collectionStarId에 해당하는 CollectionStar가 없습니다."));
+        setMainStar(collectionStar);
+        return buildCollectionStarResponse(collectionStar);
     }
-    //메인 별 조회하기
-    public CollectionStarResponse getMainStar(Long galaxyId) {
-        Optional<CollectionStar> optionalCollectionStar = collectionStarRepository.findByIsMainTrueAndGalaxyId(galaxyId);
 
-        if (optionalCollectionStar.isEmpty()) {
-            throw new IllegalArgumentException("해당 우주에는 메인 별이 없습니다.");
+    private void unsetMainStar(CollectionStar existingMainStar) {
+        existingMainStar.unsetAsMain();
+        collectionStarRepository.save(existingMainStar);
+    }
+
+    private void setMainStar(CollectionStar collectionStar) {
+        collectionStar.setAsMain();
+        collectionStarRepository.save(collectionStar);
+    }
+
+    // 메인 별 조회하기
+    public CollectionStarResponse getMainStar(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        CollectionStar collectionStar = collectionStarRepository.findByIsMainTrueAndGalaxy(galaxy)
+                .orElseThrow(() -> new IllegalArgumentException("해당 우주에는 메인 별이 없습니다."));
+        return buildCollectionStarResponse(collectionStar);
+    }
+
+    // 별 목록 가지고 오기 (도감)
+    public List<CollectionStarResponse> getStars(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        List<CollectionStar> collectionStars = collectionStarRepository.findByGalaxy(galaxy);
+        if (collectionStars.isEmpty()) {
+            throw new IllegalArgumentException("해당 우주에서는 별을 찾을 수 없습니다.");
         }
+        return collectionStars.stream()
+                .map(this::buildCollectionStarResponse)
+                .collect(Collectors.toList());
+    }
 
-        CollectionStar collectionStar = optionalCollectionStar.get();
+    private CollectionStarResponse buildCollectionStarResponse(CollectionStar collectionStar) {
         return new CollectionStarResponse(
                 collectionStar.getId(),
                 collectionStar.getGalaxy().getId(),
                 collectionStar.getStar().getId(),
                 collectionStar.getStar().getName(),
-                collectionStar.getStar().getColor(),
-                collectionStar.getStar().getImage(),
+                findImageUrlByLevelAndStar(Level.ADULT, collectionStar.getStar()),
                 collectionStar.getStar().getRarity(),
                 collectionStar.isMain()
         );
     }
 
-    //별 목록 가지고 오기(도감)
-    public List<CollectionStarResponse> getStars(Long galaxyId) {
-        // CollectionStar 엔티티를 조회
-        List<CollectionStar> collectionStars = collectionStarRepository.findByGalaxyId(galaxyId);
-
-        // 예외 처리: 조회된 데이터가 없을 경우
-        if (collectionStars.isEmpty()) {
-            throw new IllegalArgumentException("해당 우주에서는 별을 찾을 수 없습니다.");
-        }
-
-        // 변환 로직
-        return collectionStars.stream()
-                .map(star -> new CollectionStarResponse(
-                        star.getId(),
-                        star.getGalaxy().getId(),
-                        star.getStar().getId(),
-                        star.getStar().getName(),
-                        star.getStar().getColor(),
-                        star.getStar().getImage(),
-                        star.getStar().getRarity(), // 필요한 경우 추가 필드
-                        star.isMain()
-                ))
-                .collect(Collectors.toList());
-    }
-
     //육성별 조회하기
     @Transactional(readOnly = true)
-    public PetStarResponse getPetStar(Long galaxyId) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
-        PetStar petStar = petStarRepository.findByGalaxy(galaxy)
-                .orElseThrow(() -> new IllegalArgumentException("해당 우주에는 해당하는 육성별이 존재하지 않습니다."));
-
+    public PetStarResponse getPetStar(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        PetStar petStar = findPetStarByGalaxy(galaxy);
+        String imageUrl = findImageUrlByLevelAndStar(petStar.getLevel(), petStar.getStar());
         return new PetStarResponse(
                 petStar.getId(),
                 petStar.getGalaxy().getId(),
                 petStar.getStar().getId(),
                 petStar.getStar().getName(),
-                petStar.getStar().getColor(),
-                petStar.getStar().getImage(),
+                imageUrl,
                 petStar.getStar().getRarity(),
                 petStar.getLevel(),
                 petStar.getPoint()
@@ -124,66 +110,65 @@ public class StarService {
 
     //새로운 별 육성하기
     @Transactional
-    public PetStarResponse createNewPetStar(Long galaxyId) {
-        Galaxy galaxy = globalService.findGalaxyById(galaxyId);
-
-        // Galaxy에 해당하는 육성별(PetStar) 찾기
-        PetStar petStar = petStarRepository.findByGalaxy(galaxy).orElse(null);
+    public PetStarResponse createNewPetStar(Long userId) {
+        Galaxy galaxy = globalService.findGalaxyByUserId(userId);
+        PetStar petStar = galaxy.getPetStar();
 
         if (petStar == null) {
-            // 육성별이 없을 경우: 새로운 육성별 생성
-            Star randomStar = starRepository.findRandomStar()
-                    .orElseThrow(() -> new IllegalStateException("랜덤 별을 가져올 수 없습니다."));
-
-            petStar = PetStar.builder()
-                    .galaxy(galaxy)
-                    .star(randomStar)
-                    .level(1) // 초기 레벨
-                    .point(0) // 초기 포인트
-                    .build();
-
-            PetStar newPetStar = petStarRepository.save(petStar);
-
-            return new PetStarResponse(
-                    newPetStar.getId(),
-                    newPetStar.getGalaxy().getId(),
-                    newPetStar.getStar().getId(),
-                    newPetStar.getStar().getName(),
-                    newPetStar.getStar().getColor(),
-                    newPetStar.getStar().getImage(),
-                    newPetStar.getStar().getRarity(),
-                    newPetStar.getLevel(),
-                    newPetStar.getPoint()
-            );
+            petStar = createNewPetStarEntity(galaxy);
         } else {
-            // 육성별이 이미 존재할 경우: 기존 육성별을 CollectionStar로 이동
-            CollectionStar collectionStar = CollectionStar.builder()
-                    .galaxy(petStar.getGalaxy())
-                    .star(petStar.getStar())
-                    .isMain(false)
-                    .build();
-            collectionStarRepository.save(collectionStar);
-
-            // 새로운 랜덤 별 가져오기
-            Star randomStar = starRepository.findRandomStar()
-                    .orElseThrow(() -> new IllegalStateException("랜덤 별을 가져올 수 없습니다."));
-
-            // PetStar의 상태 변경
-            petStar.changeStar(randomStar);
-            petStar.resetLevelAndPoints();
-            PetStar updatedPetStar = petStarRepository.save(petStar);
-
-            return new PetStarResponse(
-                    updatedPetStar.getId(),
-                    updatedPetStar.getGalaxy().getId(),
-                    updatedPetStar.getStar().getId(),
-                    updatedPetStar.getStar().getName(),
-                    updatedPetStar.getStar().getColor(),
-                    updatedPetStar.getStar().getImage(),
-                    updatedPetStar.getStar().getRarity(),
-                    updatedPetStar.getLevel(),
-                    updatedPetStar.getPoint()
-            );
+            updateExistingPetStar(petStar);
         }
+        return buildPetStarResponse(petStar);
+    }
+
+    private PetStar createNewPetStarEntity(Galaxy galaxy) {
+        Star randomStar = findRandomStar();
+        PetStar petStar = PetStar.builder()
+                .galaxy(galaxy)
+                .star(randomStar)
+                .level(Level.MUNZI) // 초기 레벨
+                .point(0) // 초기 포인트
+                .build();
+        return petStarRepository.save(petStar);
+    }
+
+    private void updateExistingPetStar(PetStar petStar) {
+        Star randomStar = findRandomStar();
+        petStar.changeStar(randomStar);
+        petStar.resetLevelAndPoints();
+        petStarRepository.save(petStar);
+    }
+
+    private Star findRandomStar() {
+        return starRepository.findRandomStar()
+                .orElseThrow(() -> new IllegalStateException("랜덤 별을 가져올 수 없습니다."));
+    }
+
+    private PetStarResponse buildPetStarResponse(PetStar petStar) {
+        return new PetStarResponse(
+                petStar.getId(),
+                petStar.getGalaxy().getId(),
+                petStar.getStar().getId(),
+                petStar.getStar().getName(),
+                findImageUrlByLevelAndStar(petStar.getLevel(), petStar.getStar()),
+                petStar.getStar().getRarity(),
+                petStar.getLevel(),
+                petStar.getPoint()
+        );
+    }
+
+    private String findImageUrlByLevelAndStar(Level level, Star star) {
+        return switch (level) {
+            case MUNZI -> munziImage;
+            case LITTLESTAR -> littlsstarImage;
+            case BIGSTAR -> star.getBigstarImage();
+            case ADULT -> star.getAdultImage();
+        };
+    }
+
+    private PetStar findPetStarByGalaxy(Galaxy galaxy) {
+        return petStarRepository.findByGalaxy(galaxy)
+                .orElseThrow(() -> new IllegalArgumentException("해당 그룹에는 육성별이 존재하지 않습니다."));
     }
 }
