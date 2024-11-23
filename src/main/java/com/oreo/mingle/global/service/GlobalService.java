@@ -96,10 +96,10 @@ public class GlobalService {
             throw new IllegalStateException("questionsMap이 초기화되지 않았습니다.");
         }
         LocalDate today = LocalDate.now();
-        Optional<Question> existingQuestion = questionRepository.findByGalaxyAndDate(galaxy, today);
-        if (existingQuestion.isPresent()) {
-            return existingQuestion.get();
-        }
+//        Optional<Question> existingQuestion = questionRepository.findByGalaxyAndDate(galaxy, today);
+//        if (existingQuestion.isPresent()) {
+//            return existingQuestion.get();
+//        }
         QuestionType type = determineQuestionType(galaxy);
         long questionCount = questionRepository.countByGalaxy(galaxy);
         List<String> typeQuestions = questionsMap.get(type.name());
