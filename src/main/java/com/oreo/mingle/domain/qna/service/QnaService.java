@@ -13,6 +13,10 @@ import com.oreo.mingle.domain.qna.entity.Question;
 import com.oreo.mingle.domain.qna.entity.enums.QuestionType;
 import com.oreo.mingle.domain.qna.repository.AnswerRepository;
 import com.oreo.mingle.domain.qna.repository.QuestionRepository;
+import com.oreo.mingle.domain.star.entity.PetStar;
+import com.oreo.mingle.domain.star.entity.enums.Level;
+import com.oreo.mingle.domain.star.repository.PetStarRepository;
+import com.oreo.mingle.domain.star.repository.StarRepository;
 import com.oreo.mingle.domain.star.service.StarService;
 import com.oreo.mingle.domain.user.entity.User;
 import com.oreo.mingle.domain.user.repository.UserRepository;
@@ -66,11 +70,17 @@ public class QnaService {
                 .build();
         answerRepository.save(newAnswer);
         if (checkAllAnswered(newAnswer.getQuestion())) {
+            // 포인트와 캐시 추가
             globalService.savingPoint(question.getGalaxy().getId());
             globalService.savingCash(question.getGalaxy().getId());
+            //petStar 진화 처리
+            globalService.evolvePetStar(question.getGalaxy().getId());
+
         }
         return AnswerResponse.from(newAnswer);
     }
+
+
 
     //3 모든 답변이 완료됐는지 확인
     private boolean checkAllAnswered(Question question) {
@@ -79,6 +89,8 @@ public class QnaService {
         int answerCount = answerRepository.countByQuestion(question);
         return usersCount == answerCount;
     }
+
+
 
     // 4. 현재까지 받은 질문 목록 조회
     @Transactional(readOnly = true)
